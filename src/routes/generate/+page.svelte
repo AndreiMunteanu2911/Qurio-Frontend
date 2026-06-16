@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { generateExam } from '$lib/api';
+	import Button from '$lib/components/Button.svelte';
+	import SegmentedControl from '$lib/components/SegmentedControl.svelte';
 	import { pushToast } from '$lib/toasts';
 	import type { Difficulty } from '$lib/types';
 
 	let prompt = $state('');
 	let difficulty = $state<Difficulty>('medium');
 	let loading = $state(false);
+	const difficultyOptions: Difficulty[] = ['easy', 'medium', 'hard'];
+
+	const promptLength = $derived(prompt.trim().length);
 
 	async function submit() {
 		loading = true;
@@ -22,49 +27,46 @@
 	}
 </script>
 
-<section class="mx-auto max-w-4xl rounded-2xl bg-white p-6 shadow-lg sm:p-8">
-	<p class="mb-2 font-bold text-violet-500">Exam Generator</p>
-	<h1 class="text-4xl font-black text-slate-900">What should Qurio quiz you on?</h1>
-	<p class="mt-3 max-w-2xl text-slate-600">
-		Paste notes, describe a topic, or add source material. Qurio will create exactly 10 focused
-		multiple-choice questions.
-	</p>
+<section class="page-stack">
+	<div class="section-header">
+		<p class="eyebrow">Create</p>
+		<h1 class="mt-3 text-3xl font-black leading-tight text-white sm:text-4xl">
+			Turn notes into a quiz.
+		</h1>
+		<p class="mt-3 text-base leading-7 text-violet-100/72">
+			Paste source material, pick the difficulty, and generate a focused exam.
+		</p>
+	</div>
 
-	<form class="mt-8 grid gap-6" onsubmit={(event) => { event.preventDefault(); submit(); }}>
-		<label class="grid gap-2 font-semibold text-slate-700">
-			Prompt or study material
-			<textarea
-				class="min-h-56 rounded-2xl border-slate-200 p-4 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
-				bind:value={prompt}
-				required
-				minlength="20"
-				maxlength="8000"
-				placeholder="Paste a chapter summary, lecture notes, or topic description..."
-			></textarea>
-		</label>
-
-		<div class="grid gap-3 sm:grid-cols-3">
-			{#each ['easy', 'medium', 'hard'] as level}
-				<button
-					type="button"
-					class={[
-						'pressable rounded-full px-5 py-3 font-black capitalize shadow-lg',
-						difficulty === level
-							? 'border-b-violet-700 bg-violet-500 text-white'
-							: 'border-b-slate-300 bg-slate-50 text-slate-600 hover:bg-white'
-					]}
-					onclick={() => (difficulty = level as Difficulty)}
-				>
-					{level}
-				</button>
-			{/each}
+	<div class="soft-card">
+		<div class="grid gap-4">
+			<h2 class="text-sm font-bold text-violet-100/72">Difficulty</h2>
+			<SegmentedControl bind:value={difficulty} options={difficultyOptions} />
 		</div>
+	</div>
 
-		<button
-			class="pressable rounded-full border-b-emerald-700 bg-emerald-500 px-7 py-4 font-black text-white shadow-lg hover:bg-emerald-600 disabled:opacity-60"
-			disabled={loading}
-		>
-			{loading ? 'Generating...' : 'Generate Exam'}
-		</button>
-	</form>
+	<div class="soft-card">
+		<form class="grid gap-5" onsubmit={(event) => { event.preventDefault(); submit(); }}>
+			<label class="grid gap-2 text-sm font-extrabold text-violet-100">
+				Study material
+				<textarea
+					class="field custom-scrollbar min-h-[20rem] resize-y leading-7"
+					bind:value={prompt}
+					required
+					minlength="20"
+					maxlength="8000"
+					placeholder="Paste notes, a syllabus section, a concept summary, or a topic..."
+				></textarea>
+			</label>
+
+			<div class="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[#1b1037] px-3 py-2 text-xs font-black text-violet-200">
+				<p>{promptLength}/8000 characters</p>
+				<p>{promptLength < 20 ? 'Need 20+' : 'Ready'}</p>
+			</div>
+
+			<Button type="submit" disabled={loading || promptLength < 20}>
+				{loading ? 'Generating...' : 'Generate exam'}
+			</Button>
+		</form>
+	</div>
 </section>

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Button from '$lib/components/Button.svelte';
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
+	import ScrollArea from '$lib/components/ScrollArea.svelte';
 	import { listExams } from '$lib/api';
 	import { user } from '$lib/auth';
 	import { pushToast } from '$lib/toasts';
@@ -19,63 +21,68 @@
 		}
 	});
 
-	const recent = $derived(exams.slice(0, 3));
+	const recent = $derived(exams.slice(0, 5));
 	const questionCount = $derived(exams.reduce((total, exam) => total + exam.questions.length, 0));
+	const firstName = $derived(($user?.email ?? 'learner').split('@')[0]);
 </script>
 
 {#if loading}
 	<LoadingCard label="Loading your dashboard..." />
 {:else}
-	<section class="grid gap-8">
-		<div class="flex flex-col justify-between gap-5 rounded-2xl bg-white p-8 shadow-lg md:flex-row md:items-center">
-			<div>
-				<p class="mb-2 font-bold text-violet-500">Dashboard</p>
-				<h1 class="text-4xl font-black text-slate-900">Welcome, {$user?.email ?? 'learner'}</h1>
-				<p class="mt-3 max-w-2xl text-slate-600">
-					Generate a fresh exam, retake saved quizzes, and keep your practice library organized.
-				</p>
-			</div>
-			<a
-				class="pressable rounded-full border-b-emerald-700 bg-emerald-500 px-7 py-4 text-center font-black text-white shadow-lg hover:bg-emerald-600"
-				href="/generate"
-			>
-				Generate Exam
-			</a>
+	<section class="page-stack">
+		<div class="section-header">
+			<p class="eyebrow">Dashboard</p>
+			<h1 class="mt-3 text-3xl font-black leading-tight text-white sm:text-4xl">
+				Ready, {firstName}?
+			</h1>
+			<p class="mt-3 text-base leading-7 text-violet-100/72">
+				Create a fresh exam or revisit your latest practice set.
+			</p>
 		</div>
 
-		<div class="grid gap-4 md:grid-cols-3">
-			<div class="rounded-2xl bg-white p-6 shadow-lg">
-				<p class="font-bold text-slate-500">Saved exams</p>
-				<p class="mt-3 text-4xl font-black text-slate-900">{exams.length}</p>
+		<div class="soft-card grid gap-4">
+			<div class="responsive-stack">
+				<div class="stat-card">
+					<p class="text-3xl font-black text-white">{exams.length}</p>
+					<p class="mt-1 text-xs font-bold text-violet-100/70">Exams</p>
+				</div>
+				<div class="stat-card">
+					<p class="text-3xl font-black text-cyan-200">{questionCount}</p>
+					<p class="mt-1 text-xs font-bold text-violet-100/70">Questions</p>
+				</div>
+				<div class="stat-card">
+					<p class="text-3xl font-black capitalize text-white">{exams[0]?.difficulty ?? '-'}</p>
+					<p class="mt-1 text-xs font-bold text-violet-100/70">Latest</p>
+				</div>
 			</div>
-			<div class="rounded-2xl bg-white p-6 shadow-lg">
-				<p class="font-bold text-slate-500">Questions generated</p>
-				<p class="mt-3 text-4xl font-black text-emerald-600">{questionCount}</p>
-			</div>
-			<div class="rounded-2xl bg-white p-6 shadow-lg">
-				<p class="font-bold text-slate-500">Latest difficulty</p>
-				<p class="mt-3 text-4xl font-black capitalize text-violet-600">{exams[0]?.difficulty ?? 'none'}</p>
-			</div>
+			<Button href="/generate">Create exam</Button>
 		</div>
 
-		<div>
-			<div class="mb-4 flex items-center justify-between">
-				<h2 class="text-2xl font-black text-slate-900">Recent exams</h2>
-				<a class="font-bold text-violet-600 hover:text-violet-700" href="/exams">View all</a>
+		<div class="soft-card">
+			<div class="mb-4 flex items-center justify-between gap-3">
+				<h2 class="text-xl font-black text-white">Recent practice</h2>
+				<a class="text-sm font-black text-cyan-200" href="/exams">All</a>
 			</div>
-			<div class="grid gap-4 md:grid-cols-3">
-				{#each recent as exam}
-					<a class="rounded-2xl bg-white p-6 shadow-lg hover:-translate-y-1" href={`/exam/${exam.id}`}>
-						<p class="text-sm font-bold capitalize text-emerald-600">{exam.difficulty}</p>
-						<h3 class="mt-2 text-xl font-black text-slate-900">{exam.title}</h3>
-						<p class="mt-3 line-clamp-3 text-sm text-slate-600">{exam.prompt}</p>
-					</a>
-				{:else}
-					<div class="rounded-2xl bg-white p-8 text-center shadow-lg md:col-span-3">
-						<p class="font-semibold text-slate-600">No exams yet. Generate your first one.</p>
-					</div>
-				{/each}
-			</div>
+
+			<ScrollArea maxHeight="none">
+				<div class="grid gap-3">
+					{#each recent as exam}
+						<a class="surface-link p-4" href={`/exam/${exam.id}`}>
+							<div class="grid gap-2">
+								<div class="flex items-start justify-between gap-3">
+									<h3 class="min-w-0 text-lg font-black leading-snug text-white">{exam.title}</h3>
+									<p class="shrink-0 rounded-lg bg-white px-2 py-1 text-xs font-bold capitalize text-[#12072d]">{exam.difficulty}</p>
+								</div>
+								<p class="line-clamp-2 text-sm leading-6 text-violet-100/72">{exam.prompt}</p>
+							</div>
+						</a>
+					{:else}
+						<div class="soft-panel p-8 text-center">
+							<p class="font-semibold text-violet-100">No exams yet. Create your first practice set.</p>
+						</div>
+					{/each}
+				</div>
+			</ScrollArea>
 		</div>
 	</section>
 {/if}

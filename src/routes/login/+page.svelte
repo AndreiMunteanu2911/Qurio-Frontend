@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { login } from '$lib/auth';
+	import Button from '$lib/components/Button.svelte';
+	import TextField from '$lib/components/TextField.svelte';
 	import { pushToast } from '$lib/toasts';
 
 	let email = $state('');
@@ -20,39 +22,29 @@
 	}
 </script>
 
-<section class="mx-auto max-w-md rounded-2xl bg-white p-8 shadow-lg">
-	<h1 class="text-3xl font-black text-slate-900">Welcome back</h1>
-	<p class="mt-2 text-slate-600">Log in to generate and retake your saved exams.</p>
+<section class="page-stack py-2">
+	<div class="section-header">
+		<p class="eyebrow">Welcome back</p>
+		<h1 class="mt-3 text-3xl font-black leading-tight text-white sm:text-4xl">Continue your practice.</h1>
+		<p class="mt-3 text-base leading-7 text-violet-100/80">
+			Sign in to open your saved exams and pick up where you left off.
+		</p>
+	</div>
 
-	<form class="mt-8 grid gap-5" onsubmit={(event) => { event.preventDefault(); submit(); }}>
-		<label class="grid gap-2 font-semibold text-slate-700">
-			Email
-			<input
-				class="rounded-2xl border-slate-200 px-4 py-3 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
-				type="email"
-				bind:value={email}
-				required
-			/>
-		</label>
-		<label class="grid gap-2 font-semibold text-slate-700">
-			Password
-			<input
-				class="rounded-2xl border-slate-200 px-4 py-3 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
-				type="password"
-				bind:value={password}
-				required
-				minlength="6"
-			/>
-		</label>
-		<button
-			class="pressable rounded-full border-b-emerald-700 bg-emerald-500 px-6 py-3 font-black text-white shadow-lg hover:bg-emerald-600 disabled:opacity-60"
-			disabled={loading}
-		>
-			{loading ? 'Logging in...' : 'Log in'}
-		</button>
-	</form>
+	<div class="soft-card">
+		<form class="grid gap-5" onsubmit={(event) => { event.preventDefault(); submit(); }}>
+			<TextField label="Email" type="email" bind:value={email} required />
+			<TextField label="Password" type="password" bind:value={password} required minlength="6" />
+			<Button type="submit" disabled={loading}>
+				{loading ? 'Logging in...' : 'Log in'}
+			</Button>
+		</form>
 
-	<p class="mt-6 text-center text-sm font-semibold text-slate-600">
-		New here? <a class="text-violet-600 hover:text-violet-700" href="/signup">Create an account</a>
-	</p>
+		<p class="mt-6 text-center text-sm font-semibold text-violet-100/80">
+			New to Qurio?
+			<a class="text-white underline decoration-white/30 underline-offset-4 hover:text-cyan-200" href="/signup">
+				Create an account
+			</a>
+		</p>
+	</div>
 </section>

@@ -24,15 +24,15 @@
 {#if loading}
 	<LoadingCard label="Loading exam..." />
 {:else if exam}
-	<div class="mb-6">
-		<a class="font-bold text-violet-600 hover:text-violet-700" href="/exams">Back to saved exams</a>
-		<h1 class="mt-3 text-3xl font-black text-slate-900">{exam.title}</h1>
+	<div class="mb-4 soft-card">
+		<a class="text-sm font-black text-cyan-200 hover:text-white" href="/exams">Back to library</a>
+		<h1 class="mt-3 text-2xl font-black leading-tight text-white">{exam.title}</h1>
 	</div>
 	<ExamPlayer {exam} />
 {:else}
-	<section class="rounded-2xl bg-white p-8 text-center shadow-lg">
-		<h1 class="text-3xl font-black text-slate-900">Exam not found</h1>
-		<a class="mt-6 inline-block font-bold text-violet-600 hover:text-violet-700" href="/exams">
+	<section class="soft-card text-center">
+		<h1 class="text-3xl font-black text-white">Exam not found</h1>
+		<a class="mt-6 inline-block font-black text-cyan-200 hover:text-white" href="/exams">
 			Return to saved exams
 		</a>
 	</section>

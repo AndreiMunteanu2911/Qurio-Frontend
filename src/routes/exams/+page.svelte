@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Button from '$lib/components/Button.svelte';
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
+	import ModalWrapper from '$lib/components/ModalWrapper.svelte';
+	import ScrollArea from '$lib/components/ScrollArea.svelte';
 	import { deleteExam, listExams } from '$lib/api';
 	import { pushToast } from '$lib/toasts';
 	import type { Difficulty, Exam } from '$lib/types';
@@ -9,6 +12,7 @@
 	let loading = $state(true);
 	let query = $state('');
 	let difficulty = $state<Difficulty | 'all'>('all');
+	let examToDelete = $state<Exam | null>(null);
 
 	onMount(async () => {
 		await load();
@@ -25,10 +29,12 @@
 		}
 	}
 
-	async function remove(examId: string) {
+	async function remove() {
+		if (!examToDelete) return;
 		try {
-			await deleteExam(examId);
-			exams = exams.filter((exam) => exam.id !== examId);
+			await deleteExam(examToDelete.id);
+			exams = exams.filter((exam) => exam.id !== examToDelete?.id);
+			examToDelete = null;
 			pushToast('Exam deleted.', 'success');
 		} catch (error) {
 			pushToast(error instanceof Error ? error.message : 'Unable to delete exam.', 'error');
@@ -47,57 +53,76 @@
 {#if loading}
 	<LoadingCard label="Loading saved exams..." />
 {:else}
-	<section class="grid gap-6">
-		<div class="rounded-2xl bg-white p-8 shadow-lg">
-			<h1 class="text-4xl font-black text-slate-900">Saved Exams</h1>
-			<p class="mt-3 text-slate-600">Search, filter, retake, or delete your previous exams.</p>
-			<div class="mt-6 grid gap-3 md:grid-cols-[1fr_auto]">
-				<input
-					class="rounded-2xl border-slate-200 px-4 py-3 shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
-					placeholder="Search exams..."
-					bind:value={query}
-				/>
-				<select
-					class="rounded-2xl border-slate-200 px-4 py-3 font-semibold shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
-					bind:value={difficulty}
-				>
-					<option value="all">All difficulties</option>
-					<option value="easy">Easy</option>
-					<option value="medium">Medium</option>
-					<option value="hard">Hard</option>
-				</select>
-			</div>
+	<section class="page-stack">
+		<div class="section-header">
+			<p class="eyebrow">Library</p>
+			<h1 class="mt-3 text-3xl font-black leading-tight text-white sm:text-4xl">Saved exams</h1>
+			<p class="mt-3 text-base leading-7 text-violet-100/72">
+				Find a quiz, retake it, or clear old practice sets.
+			</p>
 		</div>
 
-		<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-			{#each filtered as exam}
-				<article class="rounded-2xl bg-white p-6 shadow-lg">
-					<p class="text-sm font-bold capitalize text-emerald-600">{exam.difficulty}</p>
-					<h2 class="mt-2 text-xl font-black text-slate-900">{exam.title}</h2>
-					<p class="mt-3 line-clamp-4 text-sm leading-6 text-slate-600">{exam.prompt}</p>
-					<p class="mt-4 text-xs font-semibold text-slate-400">
-						{new Date(exam.createdAt).toLocaleDateString()}
-					</p>
-					<div class="mt-5 flex gap-2">
-						<a
-							class="pressable flex-1 rounded-full border-b-emerald-700 bg-emerald-500 px-4 py-3 text-center font-bold text-white shadow-lg hover:bg-emerald-600"
-							href={`/exam/${exam.id}`}
-						>
-							Retake
-						</a>
-						<button
-							class="pressable rounded-full border-b-rose-700 bg-rose-500 px-4 py-3 font-bold text-white shadow-lg hover:bg-rose-600"
-							onclick={() => remove(exam.id)}
-						>
-							Delete
-						</button>
-					</div>
-				</article>
-			{:else}
-				<div class="rounded-2xl bg-white p-8 text-center shadow-lg md:col-span-2 xl:col-span-3">
-					<p class="font-semibold text-slate-600">No exams match your filters.</p>
+		<div class="soft-card grid gap-3">
+			<h2 class="text-lg font-black text-white">Filters</h2>
+			<input class="field" placeholder="Search exams..." bind:value={query} />
+			<select class="field font-bold" bind:value={difficulty}>
+				<option value="all">All difficulties</option>
+				<option value="easy">Easy</option>
+				<option value="medium">Medium</option>
+				<option value="hard">Hard</option>
+			</select>
+		</div>
+
+		<div class="soft-card">
+			<div class="mb-4 flex items-center justify-between gap-3">
+				<h2 class="text-xl font-black text-white">Practice sets</h2>
+				<p class="text-sm font-bold text-violet-100/65">{filtered.length} shown</p>
+			</div>
+
+			<ScrollArea maxHeight="none">
+				<div class="grid gap-3">
+					{#each filtered as exam}
+						<div class="soft-panel grid gap-4 p-4">
+							<div>
+								<div class="flex items-start justify-between gap-3">
+									<h2 class="min-w-0 text-lg font-black leading-snug text-white">{exam.title}</h2>
+									<p class="shrink-0 rounded-lg bg-white px-2 py-1 text-xs font-bold capitalize text-[#12072d]">{exam.difficulty}</p>
+								</div>
+								<p class="mt-2 line-clamp-2 text-sm leading-6 text-violet-100/76">{exam.prompt}</p>
+								<p class="mt-3 text-xs font-bold text-violet-200/70">
+									{new Date(exam.createdAt).toLocaleDateString()} - 10 questions
+								</p>
+							</div>
+							<div class="grid gap-2 sm:grid-cols-[1fr_auto]">
+								<Button href={`/exam/${exam.id}`} class="py-3">Retake</Button>
+								<Button variant="danger" onclick={() => (examToDelete = exam)}>Delete</Button>
+							</div>
+						</div>
+					{:else}
+						<div class="soft-panel p-10 text-center">
+							<p class="font-semibold text-violet-100">No exams match your filters.</p>
+						</div>
+					{/each}
 				</div>
-			{/each}
+			</ScrollArea>
 		</div>
 	</section>
 {/if}
+
+<ModalWrapper
+	open={examToDelete !== null}
+	title="Delete exam?"
+	description="This removes the saved quiz from your library. You cannot undo this action."
+	onClose={() => (examToDelete = null)}
+>
+	<p class="rounded-lg bg-[#1b1037] p-4 text-sm font-bold text-violet-100">{examToDelete?.title}</p>
+
+	{#snippet footer()}
+		<Button variant="secondary" class="flex-1" onclick={() => (examToDelete = null)}>
+			Cancel
+		</Button>
+		<Button variant="danger" class="flex-1" onclick={remove}>
+			Delete
+		</Button>
+	{/snippet}
+</ModalWrapper>

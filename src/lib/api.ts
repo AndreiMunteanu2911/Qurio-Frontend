@@ -2,7 +2,7 @@ import { PUBLIC_API_BASE_URL } from '$env/static/public';
 import { getIdToken } from './auth';
 import type { ApiErrorPayload, Difficulty, Exam } from './types';
 
-const apiBase = PUBLIC_API_BASE_URL || 'http://localhost:8080';
+const apiBase = PUBLIC_API_BASE_URL || 'http://localhost:8081';
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	const token = await getIdToken();

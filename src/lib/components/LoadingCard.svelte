@@ -2,9 +2,9 @@
 	let { label = 'Loading...' } = $props<{ label?: string }>();
 </script>
 
-<div class="rounded-2xl bg-white p-8 text-center shadow-lg">
+<div class="soft-card text-center">
 	<div
-		class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-emerald-100 border-t-emerald-500"
+		class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-white/15 border-t-cyan-200"
 	></div>
-	<p class="font-semibold text-slate-600">{label}</p>
+	<p class="font-semibold text-violet-100">{label}</p>
 </div>

@@ -28,6 +28,10 @@ Every generated exam is saved to your account so you can search, filter, and ret
 
 ## 🛠️ For Developers: Under the Hood
 
+## Frontend Credits
+
+Design inspiration: [Figma Community file 1092102311721076046](https://www.figma.com/community/file/1092102311721076046).
+
 ### Tech Stack
 
 - SvelteKit with TypeScript
@@ -48,7 +52,7 @@ Every generated exam is saved to your account so you can search, filter, and ret
 Copy `.env.example` to `.env` and fill in:
 
 ```bash
-PUBLIC_API_BASE_URL=http://localhost:8080
+PUBLIC_API_BASE_URL=http://localhost:8081
 PUBLIC_FIREBASE_API_KEY=...
 PUBLIC_FIREBASE_AUTH_DOMAIN=...
 PUBLIC_FIREBASE_PROJECT_ID=...

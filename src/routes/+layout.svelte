@@ -2,6 +2,7 @@
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import Button from '$lib/components/Button.svelte';
 	import Toasts from '$lib/components/Toasts.svelte';
 	import { authReady, initAuth, logout, user } from '$lib/auth';
 	import './layout.css';
@@ -11,6 +12,7 @@
 
 	const publicRoutes = ['/', '/login', '/signup'];
 	const isProtected = $derived(!publicRoutes.includes(page.url.pathname));
+	const isPublicRoute = $derived(publicRoutes.includes(page.url.pathname));
 
 	initAuth();
 
@@ -24,51 +26,79 @@
 		await logout();
 		goto('/');
 	}
+
+	const navItems = [
+		{ href: '/dashboard', label: 'Home', icon: 'H' },
+		{ href: '/generate', label: 'Create', icon: '+' },
+		{ href: '/exams', label: 'Library', icon: 'L' }
+	];
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
-<div class="min-h-screen bg-slate-50">
-	<header class="sticky top-0 z-40 border-b border-slate-200/70 bg-slate-50/90 backdrop-blur">
-		<nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-			<a href="/" class="flex items-center gap-3 font-black text-slate-900">
-				<span
-					class="grid h-10 w-10 place-items-center rounded-2xl bg-emerald-500 text-lg text-white shadow-lg"
-					>Q</span
-				>
-				<span>Qurio</span>
+<div class="app-shell">
+	<header class="app-nav sticky top-0 z-40">
+		<nav class="app-content flex items-center justify-between gap-3 py-3">
+			<a href="/" class="group flex items-center gap-3 text-white">
+				<p class="text-xl font-black tracking-tight">Qurio</p>
 			</a>
+
+			<div class="hidden items-center gap-1 sm:flex">
+				{#if $user && !isPublicRoute}
+					{#each navItems as item}
+						<a
+							class={[
+								'rounded-lg px-3 py-2 text-sm font-bold',
+								page.url.pathname === item.href
+									? 'bg-white text-[#12072d]'
+									: 'text-violet-100 hover:bg-white/[0.06]'
+							]}
+							href={item.href}
+						>
+							{item.label}
+						</a>
+					{/each}
+				{/if}
+			</div>
 
 			<div class="flex items-center gap-2">
 				{#if $user}
-					<a class="rounded-full px-4 py-2 text-sm font-bold text-slate-600 hover:bg-white" href="/dashboard"
-						>Dashboard</a
-					>
-					<a class="rounded-full px-4 py-2 text-sm font-bold text-slate-600 hover:bg-white" href="/exams"
-						>Saved</a
-					>
-					<button
-						class="pressable rounded-full border-b-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-lg"
-						onclick={signOut}
-					>
+					<Button variant="secondary" class="px-4 py-2" onclick={signOut}>
 						Sign out
-					</button>
+					</Button>
 				{:else}
-					<a class="rounded-full px-4 py-2 text-sm font-bold text-slate-600 hover:bg-white" href="/login"
-						>Log in</a
-					>
-					<a
-						class="pressable rounded-full border-b-emerald-700 bg-emerald-500 px-4 py-2 text-sm font-bold text-white shadow-lg hover:bg-emerald-600"
-						href="/signup">Sign up</a
-					>
+					<Button href="/login" variant="secondary" class="px-4 py-2">Log in</Button>
 				{/if}
 			</div>
 		</nav>
 	</header>
 
-	<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+	<main class={['app-content pb-28 pt-4 md:pb-12 md:pt-6', (!$user || isPublicRoute) && 'pb-8']}>
 		{@render children()}
 	</main>
+
+	{#if $user && !isPublicRoute}
+		<nav class="bottom-nav fixed inset-x-0 bottom-0 z-40 sm:hidden">
+			<div class="mx-auto grid max-w-md grid-cols-3 gap-1 p-2">
+				{#each navItems as item}
+					<a
+						class={[
+							'grid rounded-lg px-3 py-2 text-center text-xs font-bold',
+							page.url.pathname === item.href
+								? 'bg-white text-[#12072d]'
+								: 'text-violet-200 hover:bg-white/[0.06]'
+						]}
+						href={item.href}
+					>
+						<span class="mx-auto grid h-5 w-5 place-items-center text-base leading-none">
+							{item.icon}
+						</span>
+						<p>{item.label}</p>
+					</a>
+				{/each}
+			</div>
+		</nav>
+	{/if}
 </div>
 
 <Toasts />
