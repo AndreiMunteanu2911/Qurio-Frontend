@@ -6,7 +6,7 @@
 	import Toasts from '$lib/components/Toasts.svelte';
 	import { authReady, initAuth, logout, user } from '$lib/auth';
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/favicon.png';
 
 	let { children } = $props();
 
