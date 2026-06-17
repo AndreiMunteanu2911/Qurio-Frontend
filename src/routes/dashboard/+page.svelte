@@ -7,6 +7,7 @@
 	import XpBar from '$lib/components/XpBar.svelte';
 	import { claimLogin, claimQuest, getDaily, listExams, listMistakes, listProgress, listResults } from '$lib/api';
 	import { user } from '$lib/auth';
+	import { badgeRefresh } from '$lib/refresh';
 	import { pushToast } from '$lib/toasts';
 	import type { DailyData, Exam, ExamResult } from '$lib/types';
 	import { IconCoin, IconPlus, IconChartBar, IconAlertTriangle, IconCheck, IconRotate } from '@tabler/icons-svelte';
@@ -77,6 +78,7 @@
 			showLoginModal = false;
 			pushToast(`+${res.coinsAwarded} coins — daily login bonus`, 'success');
 			if (dailyData) dailyData.loginClaimedToday = true;
+			badgeRefresh.update(n => n + 1);
 		} catch (error) {
 			pushToast(error instanceof Error ? error.message : 'Failed to claim bonus.', 'error');
 		}
@@ -89,6 +91,7 @@
 			const res = await claimQuest();
 			pushToast(`+${res.coinsAwarded} coins — quest completed!`, 'success');
 			if (dailyData?.dailyQuest) dailyData.dailyQuest.completed = false; // hide after claim
+			badgeRefresh.update(n => n + 1);
 		} catch (error) {
 			pushToast(error instanceof Error ? error.message : 'Failed to claim quest reward.', 'error');
 		}

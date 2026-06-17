@@ -8,6 +8,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import ModalWrapper from '$lib/components/ModalWrapper.svelte';
 	import { getExam, completeExam, getProgress, saveProgress, clearProgress, getInventory, useItem } from '$lib/api';
+	import { badgeRefresh } from '$lib/refresh';
 	import { pushToast } from '$lib/toasts';
 	import { IconX } from '@tabler/icons-svelte';
 	import type { Exam } from '$lib/types';
@@ -82,6 +83,7 @@
 			currencyAwarded = res.currencyAwarded ?? 0;
 			newAchievements = res.newAchievements.map((a) => ({ name: a.name }));
 			showGamification = true;
+			badgeRefresh.update(n => n + 1);
 		} catch { pushToast('Failed to save results.', 'error'); }
 		try { await clearProgress(examId); } catch { /* ok */ }
 	}

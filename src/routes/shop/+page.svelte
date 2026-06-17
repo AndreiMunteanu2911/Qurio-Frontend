@@ -3,6 +3,7 @@
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
 	import { getCurrency, getInventory, purchaseItem, equipCosmetic } from '$lib/api';
 	import { SHOP_ITEMS, SHOP_CATEGORIES, type ShopCategory } from '$lib/shop';
+	import { badgeRefresh } from '$lib/refresh';
 	import { pushToast } from '$lib/toasts';
 	import type { CurrencyData, InventoryData } from '$lib/types';
 	import {
@@ -69,6 +70,7 @@
 			currency = { balance: result.balance };
 			inventory = await getInventory();
 			pushToast('Item purchased!', 'success');
+			badgeRefresh.update(n => n + 1);
 		} catch (error) {
 			pushToast(error instanceof Error ? error.message : 'Purchase failed.', 'error');
 		}

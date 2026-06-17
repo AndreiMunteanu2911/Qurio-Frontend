@@ -1,13 +1,18 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { getStreak } from '$lib/api';
+	import { badgeRefresh } from '$lib/refresh';
 	import { IconFlame } from '@tabler/icons-svelte';
 
 	let currentStreak = $state(0);
 
-	onMount(async () => {
+	async function fetchStreak() {
 		try { const data = await getStreak(); currentStreak = data.currentStreak; }
 		catch { /* silent */ }
+	}
+
+	$effect(() => {
+		$badgeRefresh;
+		fetchStreak();
 	});
 </script>
 

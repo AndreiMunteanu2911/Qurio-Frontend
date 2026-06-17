@@ -1,17 +1,23 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { getCurrency } from '$lib/api';
+	import { badgeRefresh } from '$lib/refresh';
 	import { IconCoin } from '@tabler/icons-svelte';
 
 	let balance = $state(0);
 	let loading = $state(true);
 
-	onMount(async () => {
+	async function fetchCurrency() {
+		loading = true;
 		try {
 			const data = await getCurrency();
 			balance = data.balance;
 		} catch { /* ok */ }
 		finally { loading = false; }
+	}
+
+	$effect(() => {
+		$badgeRefresh;
+		fetchCurrency();
 	});
 </script>
 

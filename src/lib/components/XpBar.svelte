@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { getXp } from '$lib/api';
+	import { badgeRefresh } from '$lib/refresh';
 
 	let {
 		compact = false
@@ -11,12 +11,17 @@
 	let totalXp = $state(0);
 	let level = $state(1);
 
-	onMount(async () => {
+	async function fetchXp() {
 		try {
 			const data = await getXp();
 			totalXp = data.totalXp;
 			level = data.level;
 		} catch { /* silent */ }
+	}
+
+	$effect(() => {
+		$badgeRefresh;
+		fetchXp();
 	});
 
 	function cumulativeXpForLevel(lv: number): number {
