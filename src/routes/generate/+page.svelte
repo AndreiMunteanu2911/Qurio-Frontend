@@ -10,7 +10,6 @@
 	let difficulty = $state<Difficulty>('medium');
 	let loading = $state(false);
 	const difficultyOptions: Difficulty[] = ['easy', 'medium', 'hard'];
-
 	const promptLength = $derived(prompt.trim().length);
 
 	async function submit() {
@@ -19,55 +18,43 @@
 			const exam = await generateExam(prompt, difficulty);
 			pushToast('Exam generated and saved.', 'success');
 			goto(`/exam/${exam.id}`);
-		} catch (error) {
-			pushToast(error instanceof Error ? error.message : 'Unable to generate exam.', 'error');
-		} finally {
-			loading = false;
-		}
+		} catch (error) { pushToast(error instanceof Error ? error.message : 'Unable to generate exam.', 'error'); }
+		finally { loading = false; }
 	}
 </script>
 
-<svelte:head>
-	<title>Generate Exam — Qurio</title>
-</svelte:head>
+<svelte:head><title>Generate Exam — Qurio</title></svelte:head>
 
 <section class="page-stack">
-	<div class="section-header">
+	<div class="card text-center sm:text-left">
 		<p class="eyebrow">Create</p>
-		<h1 class="mt-3 text-3xl font-black leading-tight text-white sm:text-4xl">
-			Turn notes into a quiz.
-		</h1>
-		<p class="mt-3 text-base leading-7 text-violet-100/72">
-			Paste source material, pick the difficulty, and generate a focused exam.
+		<h1 class="mt-1.5 text-2xl font-black leading-tight text-white sm:text-3xl">Turn notes into a quiz.</h1>
+		<p class="mt-1.5 text-sm leading-6" style="color: var(--text-muted); max-width: 460px;">
+			Paste source material, pick the difficulty, and generate a focused exam in seconds.
 		</p>
 	</div>
 
-	<div class="soft-card">
-		<div class="grid gap-4">
-			<h2 class="text-sm font-bold text-violet-100/72">Difficulty</h2>
-			<SegmentedControl bind:value={difficulty} options={difficultyOptions} />
-		</div>
+	<div class="card">
+		<h2 class="mb-2 text-xs font-extrabold" style="color: var(--text-muted);">Difficulty</h2>
+		<SegmentedControl bind:value={difficulty} options={difficultyOptions} />
 	</div>
 
-	<div class="soft-card">
-		<form class="grid gap-5" onsubmit={(event) => { event.preventDefault(); submit(); }}>
-			<label class="grid gap-2 text-sm font-extrabold text-violet-100">
+	<div class="card">
+		<form class="grid gap-4" onsubmit={(event) => { event.preventDefault(); submit(); }}>
+			<label class="grid gap-1.5 text-xs font-extrabold" style="color: var(--text-muted);">
 				Study material
 				<textarea
-					class="field custom-scrollbar min-h-[20rem] resize-y leading-7"
+					class="field custom-scrollbar"
+					style="min-height: 14rem; resize-y; line-height: 1.6;"
 					bind:value={prompt}
-					required
-					minlength="20"
-					maxlength="8000"
+					required minlength="20" maxlength="8000"
 					placeholder="Paste notes, a syllabus section, a concept summary, or a topic..."
 				></textarea>
 			</label>
-
-			<div class="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[#1b1037] px-3 py-2 text-xs font-black text-violet-200">
+			<div class="flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs font-black" style="background: var(--surface-2); color: var(--text-muted);">
 				<p>{promptLength}/8000 characters</p>
 				<p>{promptLength < 20 ? 'Need 20+' : 'Ready'}</p>
 			</div>
-
 			<Button type="submit" disabled={loading || promptLength < 20}>
 				{loading ? 'Generating...' : 'Generate exam'}
 			</Button>

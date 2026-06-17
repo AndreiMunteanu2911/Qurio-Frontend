@@ -19,15 +19,15 @@
 
 	const classes = $derived(
 		[
-			'pressable inline-flex min-h-11 items-center justify-center rounded-lg border px-4 py-2.5 text-center text-sm font-extrabold tracking-normal disabled:cursor-not-allowed disabled:opacity-60',
+			'pressable inline-flex min-h-12 items-center justify-center rounded-xl border-2 px-5 py-3 text-center text-sm font-extrabold tracking-normal disabled:cursor-not-allowed disabled:opacity-50',
 			variant === 'primary' &&
-				'border-[#6849ff] bg-[#6849ff] text-white hover:bg-[#765cff]',
+				'border-[#6849ff] bg-[#6849ff] text-white hover:bg-[#765cff] hover:border-[#765cff] active:bg-[#5a3de0]',
 			variant === 'secondary' &&
-				'border-white bg-white text-[#12072d] hover:bg-violet-50',
+				'border-white bg-white text-[#12072d] hover:bg-violet-50 active:bg-violet-100',
 			variant === 'violet' &&
-				'border-[#4f33dc] bg-[#4f33dc] text-white hover:bg-[#5d43e7]',
+				'border-[#4f33dc] bg-[#4f33dc] text-white hover:bg-[#5d43e7] hover:border-[#5d43e7] active:bg-[#432cb8]',
 			variant === 'danger' &&
-				'border-rose-400 bg-rose-500 text-white hover:bg-rose-400',
+				'border-[#a68bc7] bg-[#a68bc7]/20 text-[#a68bc7] hover:bg-[#a68bc7]/30 active:bg-[#a68bc7]/40',
 			variant === 'ghost' &&
 				'border-transparent bg-transparent text-violet-100 hover:bg-white/[0.06]',
 			className

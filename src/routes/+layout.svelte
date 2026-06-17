@@ -11,8 +11,11 @@
 
 	let { children } = $props();
 
+	const isExamPage = $derived(
+		page.url.pathname.startsWith('/exam/') || page.url.pathname.startsWith('/shared/')
+	);
 	const publicRoutes = ['/', '/login', '/signup'];
-	const isPublic = $derived(publicRoutes.includes(page.url.pathname) || page.url.pathname.startsWith('/shared/'));
+	const isPublic = $derived(publicRoutes.includes(page.url.pathname) || isExamPage);
 	const isProtected = $derived(!isPublic);
 
 	initAuth();
@@ -24,69 +27,67 @@
 	});
 
 	const navItems = [
-		{ href: '/dashboard', label: 'Home', icon: 'H' },
-		{ href: '/generate', label: 'Create', icon: '+' },
-		{ href: '/exams', label: 'Library', icon: 'L' },
-		{ href: '/profile', label: 'Profile', icon: 'P' }
+		{ href: '/dashboard', label: 'Home' },
+		{ href: '/generate', label: 'Create' },
+		{ href: '/exams', label: 'Library' },
+		{ href: '/profile', label: 'Profile' }
 	];
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
 <div class="app-shell">
-	<header class="app-nav sticky top-0 z-40">
-		<nav class="app-content flex items-center justify-between gap-3 py-3">
-			<a href="/" class="group flex items-center gap-3 text-white">
-				<p class="text-xl font-black tracking-tight">Qurio</p>
-			</a>
+	<!-- No top bar on exam pages -->
+	{#if !isExamPage}
+		<header class="app-header sticky top-0 z-40">
+			<div class="app-content">
+				<div class="app-header-inner">
+					<a href="/" class="group flex items-center gap-3 text-white">
+						<p class="text-xl font-black tracking-tight">Qurio</p>
+					</a>
 
-			<div class="hidden items-center gap-1 sm:flex">
-				{#if $user && !isPublic}
-					{#each navItems as item}
-						<a
-							class={[
-								'rounded-lg px-3 py-2 text-sm font-bold',
-								page.url.pathname === item.href
-									? 'bg-white text-[#12072d]'
-									: 'text-violet-100 hover:bg-white/[0.06]'
-							]}
-							href={item.href}
-						>
-							{item.label}
-						</a>
-					{/each}
-				{/if}
+					{#if $user && !isPublic}
+						<div class="hidden items-center gap-1 sm:flex">
+							{#each navItems as item}
+								<a
+									class={['top-nav-link', page.url.pathname === item.href ? 'active' : '']}
+									href={item.href}
+								>
+									{item.label}
+								</a>
+							{/each}
+						</div>
+					{/if}
+
+					<div class="flex items-center gap-2">
+						{#if !$user && !isPublic}
+							<Button href="/login" variant="secondary" class="px-4 py-2">Log in</Button>
+						{/if}
+					</div>
+				</div>
 			</div>
+		</header>
+	{/if}
 
-			<div class="flex items-center gap-2">
-				{#if !$user && !isPublic}
-					<Button href="/login" variant="secondary" class="px-4 py-2">Log in</Button>
-				{/if}
-			</div>
-		</nav>
-	</header>
-
-	<main class={['app-content pb-28 pt-4 md:pb-12 md:pt-6', (!$user || isPublic) && 'pb-8']}>
+	<main
+		class={[
+			'app-content',
+			!isExamPage ? 'pb-28 pt-4 md:pb-12 md:pt-6' : '',
+			(!$user || isPublic) && !isExamPage ? 'pb-8' : ''
+		]}
+	>
 		{@render children()}
 	</main>
 
-	{#if $user && !isPublic}
-		<nav class="bottom-nav fixed inset-x-0 bottom-0 z-40 sm:hidden">
+	{#if $user && !isPublic && !isExamPage}
+		<nav class="fixed inset-x-0 bottom-0 z-40 bg-[#0b041c] sm:hidden">
 			<div class="mx-auto grid max-w-md grid-cols-4 gap-1 p-2">
 				{#each navItems as item}
 					<a
-						class={[
-							'grid rounded-lg px-3 py-2 text-center text-xs font-bold',
-							page.url.pathname === item.href
-								? 'bg-white text-[#12072d]'
-								: 'text-violet-200 hover:bg-white/[0.06]'
-						]}
+						class={['bottom-nav-link', page.url.pathname === item.href ? 'active' : '']}
 						href={item.href}
 					>
-						<span class="mx-auto grid h-5 w-5 place-items-center text-base leading-none">
-							{item.icon}
-						</span>
-						<p>{item.label}</p>
+						{item.label}
 					</a>
 				{/each}
 			</div>

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { fade, fly } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import Button from '$lib/components/Button.svelte';
+	import ScrollbarContainer from '$lib/components/ScrollbarContainer.svelte';
 	import type { Exam, Question } from '$lib/types';
 
 	const TOTAL_MINUTES = 10;
@@ -27,12 +28,8 @@
 
 	const current = $derived(exam.questions[index]);
 	const isCorrect = $derived(selected === current.correctAnswerIndex);
-	const progress = $derived(
-		Math.round((((completed ? exam.questions.length : index)) / exam.questions.length) * 100)
-	);
 	const minutes = $derived(Math.floor(timeLeft / 60));
 	const seconds = $derived(timeLeft % 60);
-	const timerClass = $derived(timeLeft <= 30 ? 'text-rose-300' : 'text-violet-200');
 
 	let timerInterval: ReturnType<typeof setInterval> | undefined;
 
@@ -40,175 +37,140 @@
 		timerInterval = setInterval(() => {
 			if (!timerActive || completed) return;
 			timeLeft -= 1;
-			if (timeLeft <= 0) {
-				timeLeft = 0;
-				timerActive = false;
-				finish();
-			}
+			if (timeLeft <= 0) { timeLeft = 0; timerActive = false; finish(); }
 		}, 1000);
-
-		return () => {
-			if (timerInterval) clearInterval(timerInterval);
-		};
+		return () => { if (timerInterval) clearInterval(timerInterval); };
 	});
 
 	function choose(optionIndex: number) {
 		if (selected !== null) return;
 		selected = optionIndex;
 		timerActive = false;
-
-		const correct = optionIndex === current.correctAnswerIndex;
-		if (correct) {
-			score += 1;
-		} else {
-			if (!mistakeIds.includes(current.id)) {
-				newMistakes.push({ question: current });
-			}
+		if (optionIndex === current.correctAnswerIndex) score += 1;
+		else if (!mistakeIds.includes(current.id)) {
+			newMistakes = [...newMistakes, { question: current }];
 		}
-		answers.push({ questionId: current.id, selected: optionIndex, correct });
+		answers = [...answers, { questionId: current.id, selected: optionIndex, correct: optionIndex === current.correctAnswerIndex }];
 	}
 
 	function next() {
-		if (index === exam.questions.length - 1) {
-			finish();
-			return;
-		}
-		index += 1;
-		selected = null;
-		timerActive = true;
+		if (index === exam.questions.length - 1) { finish(); return; }
+		index += 1; selected = null; timerActive = true;
 	}
 
 	function finish() {
 		completed = true;
 		if (timerInterval) clearInterval(timerInterval);
-		onDone({
-			score,
-			total: exam.questions.length,
-			answers,
-			mistakes: newMistakes
-		});
+		onDone({ score, total: exam.questions.length, answers, mistakes: newMistakes });
 	}
 
 	function restart() {
-		index = 0;
-		selected = null;
-		score = 0;
-		completed = false;
-		timeLeft = TOTAL_MINUTES * 60;
-		timerActive = true;
-		answers = [];
-		newMistakes = [];
+		index = 0; selected = null; score = 0; completed = false;
+		timeLeft = TOTAL_MINUTES * 60; timerActive = true; answers = []; newMistakes = [];
 		if (timerInterval) clearInterval(timerInterval);
 		timerInterval = setInterval(() => {
 			if (!timerActive || completed) return;
 			timeLeft -= 1;
-			if (timeLeft <= 0) {
-				timeLeft = 0;
-				timerActive = false;
-				finish();
-			}
+			if (timeLeft <= 0) { timeLeft = 0; timerActive = false; finish(); }
 		}, 1000);
 	}
 
-	function questionLabel(q: Question, i: number) {
-		if (q.type === 'true-false') return `Question ${i + 1} (True / False)`;
-		if (q.type === 'fill-blank') return `Question ${i + 1} (Fill the blank)`;
-		return `Question ${i + 1}`;
-	}
-
-	function displayQuestion(text: string) {
-		return text.replace(/_{3,}/g, '__________');
-	}
-
-	function optionLabel(optionIndex: number) {
-		return String.fromCharCode(65 + optionIndex);
-	}
+	function optLabel(i: number) { return String.fromCharCode(65 + i); }
+	function displayQ(text: string) { return text.replace(/_{3,}/g, '__________'); }
 </script>
 
 {#if completed}
-	<section in:fly={{ y: 16, duration: 220 }} class="soft-card text-center">
+	<div in:fly={{ y: 12, duration: 180 }} class="card text-center" style="max-width: 480px;">
 		<p class="eyebrow">Complete</p>
-		<h1 class="mt-4 text-6xl font-black text-white">{score}</h1>
-		<p class="mt-1 text-sm font-black text-violet-100">out of {exam.questions.length}</p>
-		{#if timeLeft <= 0 && !answers.length}
-			<p class="mt-3 text-sm font-bold text-rose-300">Time's up!</p>
+		<h1 class="mt-5 text-7xl font-black text-white">{score}</h1>
+		<p class="mt-1 text-sm font-bold" style="color: var(--text-muted);">out of {exam.questions.length}</p>
+		{#if timeLeft <= 0 && answers.length === 0}
+			<p class="mt-2 text-sm font-bold" style="color: var(--incorrect);">Time's up</p>
 		{/if}
-		<p class="mx-auto mt-5 text-sm leading-6 text-violet-100 md:text-base">
-			{score >= 8
-				? 'Excellent command of the material.'
-				: score >= 5
-					? 'Solid progress. A retake will sharpen the edges.'
-					: 'Keep practicing. Each pass makes the pattern clearer.'}
+		<p class="mx-auto mt-3 max-w-xs text-sm leading-6" style="color: var(--text-muted);">
+			{score >= 8 ? 'You really know this material.' : score >= 5 ? 'Solid effort. A retake will lock it in.' : 'Each attempt builds understanding.'}
 		</p>
-		<div class="mt-6 grid gap-2">
-			<Button onclick={restart}>Retake exam</Button>
-			<Button href="/generate" variant="violet">Create new exam</Button>
-			<Button href="/dashboard" variant="secondary">Dashboard</Button>
+		<div class="mt-7 grid gap-2 sm:grid-cols-2">
+			<Button onclick={restart} variant="primary" class="w-full">Retake</Button>
+			<Button href="/mistakes" variant="secondary" class="w-full">Mistakes</Button>
+			<Button href="/generate" variant="violet" class="w-full">New exam</Button>
+			<Button href="/dashboard" variant="secondary" class="w-full">Dashboard</Button>
 		</div>
-	</section>
+	</div>
+
 {:else}
-	<section class="soft-card grid gap-5">
-		<div>
-			<div class="mb-3 flex items-center justify-between gap-3 px-1">
-				<p class="text-xs font-black text-violet-200">{questionLabel(current, index)}</p>
-				<div class="flex items-center gap-3">
-					<p class="rounded-full bg-cyan-200/12 px-2.5 py-1 text-xs font-black capitalize text-cyan-200">{exam.difficulty}</p>
-					<p class="text-xs font-black {timerClass}">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</p>
+	<div style="display: flex; flex-direction: column; height: 100%; gap: 0;">
+		<!-- Progress + meta -->
+		<div style="margin-bottom: 0.625rem; flex-shrink: 0;">
+			<div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.375rem;">
+				<div style="display: flex; align-items: center; gap: 0.375rem;">
+					<span class="text-xs font-bold" style="color: var(--text-muted);">{index + 1}/{exam.questions.length}</span>
+					<span class="tag tag-violet">
+						{current.type === 'true-false' ? 'T/F' : current.type === 'fill-blank' ? 'Fill' : 'MCQ'}
+					</span>
+				</div>
+				<div style="display: flex; align-items: center; gap: 0.375rem;">
+					<span class="tag tag-cyan">{exam.difficulty}</span>
+					<span class="text-xs font-bold" style="color: var(--text-muted); font-variant-numeric: tabular-nums;">
+						{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+					</span>
 				</div>
 			</div>
-			<div class="h-2 overflow-hidden rounded-full bg-white/10">
-				<div
-					class="h-2 rounded-full bg-[#6849ff]"
-					style={`width: ${progress}%`}
-				></div>
+			<div class="progress-seg">
+				{#each exam.questions as _, i}
+					<div class={['seg', i < index ? 'done' : '', i === index ? 'active' : '']}></div>
+				{/each}
 			</div>
 		</div>
 
 		{#key index}
-			<article in:fly={{ x: 24, duration: 220 }} out:fade={{ duration: 120 }} class="grid gap-6">
-				<h2 class="text-2xl font-black leading-tight text-white">{displayQuestion(current.question)}</h2>
+			<div in:fly={{ x: 10, duration: 160 }} style="display: flex; flex-direction: column; flex: 1; gap: 0.625rem; min-height: 0;">
+				<!-- Question (scrollable if long) -->
+				<ScrollbarContainer style="flex: 1; min-height: 0;">
+					<h2 class="text-xl font-black leading-snug text-white sm:text-2xl">
+						{displayQ(current.question)}
+					</h2>
+				</ScrollbarContainer>
 
-				<div class="grid gap-3">
-					{#each current.options as option, optionIndex}
-						<button
-							class={[
-								'pressable rounded-lg px-4 py-4 text-left text-sm font-extrabold',
-								selected === null
-									? 'bg-[#1b1037] text-violet-50 hover:bg-[#25164a]'
-									: optionIndex === current.correctAnswerIndex
-										? 'border border-cyan-100 bg-cyan-300 text-[#070020]'
-										: selected === optionIndex
-											? 'border border-rose-200 bg-rose-500 text-white'
-											: 'border-white/10 bg-white/[0.03] text-violet-200'
-							]}
-							disabled={selected !== null}
-							onclick={() => choose(optionIndex)}
-						>
-							<span class="mr-3 inline-block w-5 shrink-0 font-black">{optionLabel(optionIndex)}</span>
-							{option}
-						</button>
-					{/each}
-				</div>
-
+				<!-- Explanation (in the middle after answering) -->
 				{#if selected !== null}
-					<div
-						in:fly={{ y: 12, duration: 180 }}
-						class={[
-							'rounded-lg border p-4',
-							isCorrect ? 'border-cyan-200/60 bg-cyan-400/15' : 'border-rose-200/60 bg-rose-500/15'
-						]}
-					>
-						<p class={['font-black', isCorrect ? 'text-cyan-100' : 'text-rose-100']}>
-							{isCorrect ? 'Correct' : 'Not quite'}
+					<div in:fly={{ y: 6, duration: 120 }} class="feedback {isCorrect ? 'correct' : 'incorrect'}" style="flex-shrink: 0;">
+						<p class="text-sm font-black" style="color: {isCorrect ? 'var(--correct)' : 'var(--incorrect)'};">
+							{isCorrect ? 'Correct' : 'Incorrect'}
 						</p>
-						<p class="mt-2 text-sm leading-6 text-violet-50">{current.explanation}</p>
+						<p class="mt-1 text-xs leading-5" style="color: var(--text-muted);">{current.explanation}</p>
 					</div>
-
-					<Button class="w-full" onclick={next}>
-						{index === exam.questions.length - 1 ? 'See score' : 'Next question'}
-					</Button>
 				{/if}
-			</article>
+
+				<!-- Options + button (pushed to bottom, with reserved button space) -->
+				<div style="margin-top: auto; flex-shrink: 0; padding-bottom: 1rem;">
+					<div style="display: grid; gap: 0.5rem; margin-bottom: 0.5rem;">
+						{#each current.options as option, optionIndex}
+							<button
+								class={[
+									'option',
+									selected === null ? '' :
+										optionIndex === current.correctAnswerIndex ? 'correct' :
+										selected === optionIndex ? 'incorrect' : 'reveal'
+								]}
+								disabled={selected !== null}
+								onclick={() => choose(optionIndex)}
+							>
+								<span class="letter">{optLabel(optionIndex)}</span>
+								<span>{option}</span>
+							</button>
+						{/each}
+					</div>
+					<!-- Reserved space so options don't jump when button appears -->
+					<div style="min-height: 3rem;">
+						{#if selected !== null}
+							<Button class="w-full" onclick={next}>
+								{index === exam.questions.length - 1 ? 'See score' : 'Continue'}
+							</Button>
+						{/if}
+					</div>
+				</div>
+			</div>
 		{/key}
-	</section>
+	</div>
 {/if}
