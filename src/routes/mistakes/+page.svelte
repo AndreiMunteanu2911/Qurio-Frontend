@@ -3,11 +3,12 @@
 	import { fly } from 'svelte/transition';
 	import Button from '$lib/components/Button.svelte';
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
-	import { listMistakes, deleteMistake } from '$lib/api';
+	import { listMistakes, deleteMistake, mistakesCount } from '$lib/api';
 	import { pushToast } from '$lib/toasts';
 	import type { Mistake } from '$lib/types';
 
 	let mistakes = $state<Mistake[]>([]);
+	let totalCount = $state(0);
 	let loading = $state(true);
 	let reviewIndex = $state<number | null>(null);
 	let selected = $state<number | null>(null);
@@ -15,12 +16,13 @@
 	let completed = $state(false);
 
 	onMount(async () => {
-		try { mistakes = await listMistakes(); }
+		try { const [m, c] = await Promise.all([listMistakes(), mistakesCount()]); mistakes = m; totalCount = c.count; }
 		catch (error) { pushToast(error instanceof Error ? error.message : 'Unable to load mistakes.', 'error'); }
 		finally { loading = false; }
 	});
 
-	const current = $derived(reviewIndex !== null ? mistakes[reviewIndex].question : null);
+	const reviewMistakes = $derived(mistakes.slice(0, 10));
+	const current = $derived(reviewIndex !== null ? reviewMistakes[reviewIndex].question : null);
 
 	function startReview() { reviewIndex = 0; selected = null; mistakesDone = 0; completed = false; }
 	function choose(i: number) {
@@ -31,7 +33,7 @@
 	function next() {
 		if (!current || selected === null) return;
 		if (selected === current.correctAnswerIndex) deleteMistake(mistakes[reviewIndex!].id).catch(() => {});
-		if (reviewIndex! >= mistakes.length - 1) { completed = true; return; }
+		if (reviewIndex! >= reviewMistakes.length - 1) { completed = true; return; }
 		reviewIndex! += 1; selected = null;
 	}
 	function restart() { reviewIndex = null; selected = null; mistakesDone = 0; completed = false; }
@@ -58,10 +60,16 @@
 			<p class="mt-1 text-xs" style="color: var(--text-muted);">Questions answered incorrectly will appear here.</p>
 			<Button class="mt-3" href="/generate">Create exam</Button>
 		</div>
+	{:else if mistakes.length < 10}
+		<div class="card text-center" style="max-width: 400px;">
+			<p class="text-base font-black text-white">{totalCount} mistake{totalCount !== 1 ? 's' : ''}</p>
+			<p class="mt-1 text-xs" style="color: var(--text-muted);">Review unlocks when you have at least 10 mistakes. Keep practicing.</p>
+			<Button class="mt-3" href="/generate">Create exam</Button>
+		</div>
 	{:else if reviewIndex === null}
 		<div class="card" style="max-width: 400px;">
 			<p class="text-sm font-black" style="color: var(--text-muted);">
-				{mistakes.length} question{mistakes.length > 1 ? 's' : ''} to review
+				{totalCount} mistake{totalCount !== 1 ? 's' : ''} · reviewing {Math.min(10, mistakes.length)} of them
 			</p>
 			<Button class="mt-3 w-full" onclick={startReview}>Start review</Button>
 		</div>
@@ -69,7 +77,7 @@
 		<div in:fly={{ y: 12, duration: 180 }} class="card text-center" style="max-width: 440px;">
 			<p class="eyebrow">Review complete</p>
 			<h1 class="mt-4 text-5xl font-black text-white">{mistakesDone}</h1>
-			<p class="mt-0.5 text-xs font-bold" style="color: var(--text-muted);">out of {mistakes.length} cleared</p>
+			<p class="mt-0.5 text-xs font-bold" style="color: var(--text-muted);">out of {reviewMistakes.length} cleared</p>
 			<div class="mt-5 grid gap-2">
 				<Button onclick={restart}>Review again</Button>
 				<Button href="/dashboard" variant="secondary">Dashboard</Button>
@@ -81,11 +89,11 @@
 			<div in:fly={{ x: 10, duration: 160 }} style="max-width: 560px;">
 				<div class="card-sm">
 					<div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
-						<p class="text-xs font-bold" style="color: var(--text-muted);">Review {reviewIndex! + 1} / {mistakes.length}</p>
+						<p class="text-xs font-bold" style="color: var(--text-muted);">Review {reviewIndex! + 1} / {reviewMistakes.length}</p>
 						<span class="tag tag-violet">{current.type === 'true-false' ? 'T/F' : current.type === 'fill-blank' ? 'Fill' : 'MCQ'}</span>
 					</div>
 					<div class="progress-seg mt-1.5">
-						{#each mistakes as _, i}
+						{#each reviewMistakes as _, i}
 							<div class={['seg', i < reviewIndex! ? 'done' : '', i === reviewIndex! ? 'active' : '']}></div>
 						{/each}
 					</div>
@@ -122,7 +130,7 @@
 						</div>
 						{#if selected !== null}
 							<Button class="w-full mt-2" onclick={next}>
-								{reviewIndex! >= mistakes.length - 1 ? 'See results' : 'Continue'}
+								{reviewIndex! >= reviewMistakes.length - 1 ? 'See results' : 'Continue'}
 							</Button>
 						{/if}
 					</div>

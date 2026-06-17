@@ -5,6 +5,7 @@
 	import SegmentedControl from '$lib/components/SegmentedControl.svelte';
 	import { pushToast } from '$lib/toasts';
 	import type { Difficulty } from '$lib/types';
+	import { IconPlayerPlay } from '@tabler/icons-svelte';
 
 	let prompt = $state('');
 	let difficulty = $state<Difficulty>('medium');
@@ -56,7 +57,7 @@
 				<p>{promptLength < 20 ? 'Need 20+' : 'Ready'}</p>
 			</div>
 			<Button type="submit" disabled={loading || promptLength < 20}>
-				{loading ? 'Generating...' : 'Generate exam'}
+				{loading ? 'Generating...' : 'Generate exam'} <IconPlayerPlay size={16} stroke-width={2.5} />
 			</Button>
 		</form>
 	</div>

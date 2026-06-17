@@ -4,13 +4,16 @@
 	import Button from '$lib/components/Button.svelte';
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
 	import ModalWrapper from '$lib/components/ModalWrapper.svelte';
+	import StreakBadge from '$lib/components/StreakBadge.svelte';
 	import TextField from '$lib/components/TextField.svelte';
+	import XpBar from '$lib/components/XpBar.svelte';
 	import { listExams, listResults, listMistakes } from '$lib/api';
 	import { user, logout } from '$lib/auth';
 	import { pushToast } from '$lib/toasts';
 	import { firebaseAuth } from '$lib/firebase';
 	import { updateProfile } from 'firebase/auth';
 	import type { Exam, ExamResult, Mistake } from '$lib/types';
+	import { IconEdit, IconLogout, IconAward, IconChartBar } from '@tabler/icons-svelte';
 
 	let loading = $state(true);
 	let displayName = $state('');
@@ -19,9 +22,12 @@
 	let exams = $state<Exam[]>([]);
 	let results = $state<ExamResult[]>([]);
 	let mistakes = $state<Mistake[]>([]);
-
 	onMount(async () => {
-		try { const [e, r, m] = await Promise.all([listExams(), listResults(), listMistakes()]); exams = e; results = r; mistakes = m; if ($user?.displayName) displayName = $user.displayName; }
+		try {
+			const [e, r, m] = await Promise.all([listExams(), listResults(), listMistakes()]);
+			exams = e; results = r; mistakes = m;
+			if ($user?.displayName) displayName = $user.displayName;
+		}
 		catch { /* ok */ }
 		finally { loading = false; }
 	});
@@ -57,6 +63,11 @@
 			<div class="stat-card"><p class="value text-white">{mistakes.length}</p><p class="label">Mistakes</p></div>
 		</div>
 
+		<div class="card" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+			<XpBar />
+			<StreakBadge />
+		</div>
+
 		{#if results.length > 0}
 			<div class="stat-grid">
 				<div class="stat-card"><p class="value" style="color: var(--cyan);">{avgScore}%</p><p class="label">Average score</p></div>
@@ -66,9 +77,18 @@
 		{/if}
 
 		<div class="card-grid card-grid-2">
-			<Button variant="secondary" class="w-full" onclick={() => { displayName = $user?.displayName || ''; showEditName = true; }}>Edit display name</Button>
-			<Button href="/results" variant="secondary" class="w-full">Results history</Button>
-			<Button variant="danger" class="w-full" onclick={signOut}>Sign out</Button>
+			<Button variant="secondary" class="w-full" onclick={() => { displayName = $user?.displayName || ''; showEditName = true; }}>
+				<IconEdit size={14} stroke-width={2} /> Edit display name
+			</Button>
+			<Button href="/results" variant="secondary" class="w-full">
+				<IconChartBar size={14} stroke-width={2} /> Results history
+			</Button>
+			<Button href="/achievements" variant="violet" class="w-full">
+				<IconAward size={14} stroke-width={2} /> Achievements
+			</Button>
+			<Button variant="danger" class="w-full" onclick={signOut}>
+				<IconLogout size={14} stroke-width={2} /> Sign out
+			</Button>
 		</div>
 	</section>
 {/if}

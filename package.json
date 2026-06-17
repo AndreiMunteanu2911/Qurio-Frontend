@@ -45,6 +45,7 @@
 		"@capacitor/android": "^8.4.0",
 		"@capacitor/core": "^8.4.0",
 		"@fontsource/urbanist": "^5.2.7",
+		"@tabler/icons-svelte": "^3.44.0",
 		"firebase": "^12.7.0"
 	}
 }

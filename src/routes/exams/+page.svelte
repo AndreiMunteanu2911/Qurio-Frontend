@@ -4,24 +4,37 @@
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
 	import ModalWrapper from '$lib/components/ModalWrapper.svelte';
 	import Select from '$lib/components/Select.svelte';
-	import { deleteExam, listExams } from '$lib/api';
+	import { deleteExam, listExams, listResults } from '$lib/api';
 	import { pushToast } from '$lib/toasts';
-	import type { Difficulty, Exam } from '$lib/types';
+	import type { Category, Difficulty, Exam, ExamResult } from '$lib/types';
+	import { IconSearch } from '@tabler/icons-svelte';
 
 	let exams = $state<Exam[]>([]);
+	let results = $state<ExamResult[]>([]);
 	let loading = $state(true);
 	let query = $state('');
 	let difficulty = $state<Difficulty | 'all'>('all');
+	let category = $state<Category | 'all'>('all');
 	let examToDelete = $state<Exam | null>(null);
 
 	onMount(async () => { await load(); });
 
 	async function load() {
 		loading = true;
-		try { exams = await listExams(); }
+		try { const [e, r] = await Promise.all([listExams(), listResults()]); exams = e; results = r; }
 		catch (error) { pushToast(error instanceof Error ? error.message : 'Unable to load exams.', 'error'); }
 		finally { loading = false; }
 	}
+
+	const bestScores = $derived.by(() => {
+		const m = new Map<string, { score: number; total: number }>();
+		for (const r of results) {
+			const cur = m.get(r.examId);
+			const pct = r.score / r.totalQuestions;
+			if (!cur || pct > cur.score / cur.total) m.set(r.examId, { score: r.score, total: r.totalQuestions });
+		}
+		return m;
+	});
 
 	async function remove() {
 		if (!examToDelete) return;
@@ -36,7 +49,8 @@
 	const filtered = $derived(
 		exams.filter(e =>
 			`${e.title} ${e.prompt}`.toLowerCase().includes(query.toLowerCase()) &&
-			(difficulty === 'all' || e.difficulty === difficulty)
+			(difficulty === 'all' || e.difficulty === difficulty) &&
+			(category === 'all' || e.category === category)
 		)
 	);
 </script>
@@ -58,8 +72,12 @@
 		<div class="card-grid card-grid-2" style="align-items: start;">
 			<div class="card">
 				<h2 class="mb-2 text-sm font-black text-white">Filters</h2>
-				<input class="field" placeholder="Search exams..." bind:value={query} />
+				<div class="relative">
+					<IconSearch size={14} stroke-width={2} style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;" />
+					<input class="field" placeholder="Search exams..." bind:value={query} style="padding-left: 2rem;" />
+				</div>
 				<Select bind:value={difficulty} options={['all', 'easy', 'medium', 'hard']} label="All difficulties" />
+				<Select bind:value={category} options={['all', 'biology', 'chemistry', 'physics', 'mathematics', 'computer-science', 'engineering', 'medicine', 'psychology', 'sociology', 'economics', 'business', 'history', 'geography', 'literature', 'philosophy', 'law', 'art', 'music', 'languages', 'education', 'general']} label="All categories" />
 			</div>
 
 			<div class="card" style="max-height: 65vh;">
@@ -70,6 +88,7 @@
 
 				<div class="grid gap-1.5" style="overflow-y: auto; max-height: calc(65vh - 3.5rem); scrollbar-width: thin; scrollbar-color: var(--violet) transparent;">
 					{#each filtered as exam}
+						{@const best = bestScores.get(exam.id)}
 						<div class="option cursor-default">
 							<div class="grid w-full gap-2">
 								<a href={`/exam/${exam.id}`} class="grid gap-1">
@@ -80,6 +99,8 @@
 									<p class="line-clamp-2 text-xs leading-5" style="color: var(--text-muted);">{exam.prompt}</p>
 									<p class="text-xs font-bold" style="color: var(--text-muted);">
 										{new Date(exam.createdAt).toLocaleDateString()} — 10 questions
+										{#if best}<span style="color: var(--cyan);"> · Best: {best.score}/{best.total}</span>{/if}
+										<span class="tag tag-surface" style="font-size: 0.6rem;">{exam.category}</span>
 									</p>
 								</a>
 								<div class="flex gap-2">

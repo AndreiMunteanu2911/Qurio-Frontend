@@ -3,11 +3,14 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Button from '$lib/components/Button.svelte';
+	import StreakBadge from '$lib/components/StreakBadge.svelte';
 	import Toasts from '$lib/components/Toasts.svelte';
+	import XpBar from '$lib/components/XpBar.svelte';
 	import { authReady, initAuth, user } from '$lib/auth';
 	import '@fontsource/urbanist';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.png';
+	import { IconDashboard, IconPlus, IconBooks, IconUser } from '@tabler/icons-svelte';
 
 	let { children } = $props();
 
@@ -27,10 +30,10 @@
 	});
 
 	const navItems = [
-		{ href: '/dashboard', label: 'Home' },
-		{ href: '/generate', label: 'Create' },
-		{ href: '/exams', label: 'Library' },
-		{ href: '/profile', label: 'Profile' }
+		{ href: '/dashboard', label: 'Home', icon: IconDashboard },
+		{ href: '/generate', label: 'Create', icon: IconPlus },
+		{ href: '/exams', label: 'Library', icon: IconBooks },
+		{ href: '/profile', label: 'Profile', icon: IconUser }
 	];
 </script>
 
@@ -53,6 +56,7 @@
 									class={['top-nav-link', page.url.pathname === item.href ? 'active' : '']}
 									href={item.href}
 								>
+									<item.icon size={14} stroke-width={2} />
 									{item.label}
 								</a>
 							{/each}
@@ -60,6 +64,10 @@
 					{/if}
 
 					<div class="flex items-center gap-2">
+						{#if $user && !isPublic}
+							<XpBar compact />
+							<StreakBadge />
+						{/if}
 						{#if !$user && !isPublic}
 							<Button href="/login" variant="secondary" class="px-4 py-2">Log in</Button>
 						{/if}
@@ -87,6 +95,7 @@
 						class={['bottom-nav-link', page.url.pathname === item.href ? 'active' : '']}
 						href={item.href}
 					>
+						<item.icon size={18} stroke-width={2} />
 						{item.label}
 					</a>
 				{/each}

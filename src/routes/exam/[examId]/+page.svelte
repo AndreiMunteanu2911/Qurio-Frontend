@@ -1,16 +1,20 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { fly } from 'svelte/transition';
 	import ExamPlayer from '$lib/components/ExamPlayer.svelte';
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import { getExam, saveResult, addMistakes } from '$lib/api';
+	import { getExam, completeExam } from '$lib/api';
 	import { pushToast } from '$lib/toasts';
 	import type { Exam } from '$lib/types';
 
 	let exam = $state<Exam | null>(null);
 	let loading = $state(true);
 	let showShare = $state(false);
+	let xpAwarded = $state<number | null>(null);
+	let newAchievements = $state<{ name: string }[]>([]);
+	let showGamification = $state(false);
 
 	const examId = $derived(page.params.examId!);
 	const title = $derived(exam ? `${exam.title} — Qurio` : 'Exam — Qurio');
@@ -21,14 +25,21 @@
 		finally { loading = false; }
 	});
 
-	async function handleDone(result: { score: number; total: number; answers: { questionId: string; selected: number; correct: boolean }[]; mistakes: { question: import('$lib/types').Question }[] }) {
+	async function handleDone(result: { score: number; total: number; answers: { questionId: string; selected: number; correct: boolean }[] }) {
 		const e = exam;
 		if (!e) return;
 		try {
-			await saveResult({ examId: e.id, examTitle: e.title, difficulty: e.difficulty, score: result.score, totalQuestions: result.total, answers: result.answers });
-			if (result.mistakes.length > 0) {
-				await addMistakes(result.mistakes.map(m => ({ examId: e.id, examTitle: e.title, difficulty: e.difficulty, question: m.question })));
-			}
+			const res = await completeExam({
+				examId: e.id,
+				examTitle: e.title,
+				difficulty: e.difficulty,
+				score: result.score,
+				totalQuestions: result.total,
+				answers: result.answers
+			});
+			xpAwarded = res.xp.awarded;
+			newAchievements = res.newAchievements.map((a) => ({ name: a.name }));
+			showGamification = true;
 		} catch { pushToast('Failed to save results.', 'error'); }
 	}
 
@@ -41,10 +52,9 @@
 <svelte:head><title>{title}</title></svelte:head>
 
 {#if loading}
-	<LoadingCard label="Loading exam..." />
+	<div style="padding: 1.125rem;"><LoadingCard label="Loading exam..." /></div>
 {:else if exam}
 	<div style="display: flex; flex-direction: column; height: 100dvh;">
-		<!-- Top bar: back + share, aligned center -->
 		<div style="display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding-block: 0.375rem 0.5rem;">
 			<a class="text-sm font-bold leading-none" style="color: var(--cyan); padding: 0.25rem 0;" href="/exams">Back</a>
 			<div class="relative" style="line-height: 1;">
@@ -62,6 +72,17 @@
 		<div style="flex: 1; min-height: 0;">
 			<ExamPlayer {exam} onDone={handleDone} />
 		</div>
+
+		{#if showGamification}
+			<div in:fly={{ y: 8, duration: 200 }} style="flex-shrink: 0; padding-block: 0.5rem;">
+				<div class="card" style="text-align: center;">
+					<p class="text-sm font-black" style="color: var(--cyan);">+{xpAwarded} XP</p>
+					{#each newAchievements as ach}
+						<p class="mt-1 text-xs font-bold text-white">{ach.name} unlocked</p>
+					{/each}
+				</div>
+			</div>
+		{/if}
 	</div>
 {:else}
 	<div class="card text-center py-10">
