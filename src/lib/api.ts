@@ -1,6 +1,6 @@
 import { PUBLIC_API_BASE_URL } from '$env/static/public';
 import { getIdToken } from './auth';
-import type { ApiErrorPayload, Difficulty, Exam } from './types';
+import type { ApiErrorPayload, Difficulty, Exam, ExamResult, Mistake, ShareLink } from './types';
 
 const apiBase = PUBLIC_API_BASE_URL || 'http://localhost:8081';
 
@@ -33,6 +33,23 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	return (await response.json()) as T;
 }
 
+async function requestPublic<T>(path: string): Promise<T> {
+	const response = await fetch(`${apiBase}${path}`);
+
+	if (!response.ok) {
+		let message = 'Something went wrong.';
+		try {
+			const payload = (await response.json()) as ApiErrorPayload;
+			message = payload.error?.message ?? message;
+		} catch {
+			message = response.statusText || message;
+		}
+		throw new Error(message);
+	}
+
+	return (await response.json()) as T;
+}
+
 export function generateExam(prompt: string, difficulty: Difficulty) {
 	return request<Exam>('/api/exams/generate', {
 		method: 'POST',
@@ -50,4 +67,41 @@ export function getExam(examId: string) {
 
 export function deleteExam(examId: string) {
 	return request<void>(`/api/exams/${examId}`, { method: 'DELETE' });
+}
+
+export function getSharedExam(examId: string) {
+	return requestPublic<{ id: string; title: string; difficulty: Difficulty; questions: Exam['questions']; createdAt: string }>(
+		`/api/shared/${examId}`
+	);
+}
+
+export function getShareLink() {
+	const url = window.location.origin + window.location.pathname;
+	return { url } as ShareLink;
+}
+
+export function listMistakes() {
+	return request<Mistake[]>('/api/mistakes');
+}
+
+export function addMistakes(mistakes: Omit<Mistake, 'id' | 'createdAt'>[]) {
+	return request<Mistake[]>('/api/mistakes', {
+		method: 'POST',
+		body: JSON.stringify({ mistakes })
+	});
+}
+
+export function deleteMistake(mistakeId: string) {
+	return request<void>(`/api/mistakes/${mistakeId}`, { method: 'DELETE' });
+}
+
+export function listResults() {
+	return request<ExamResult[]>('/api/results');
+}
+
+export function saveResult(result: Omit<ExamResult, 'id' | 'createdAt'>) {
+	return request<ExamResult>('/api/results', {
+		method: 'POST',
+		body: JSON.stringify(result)
+	});
 }

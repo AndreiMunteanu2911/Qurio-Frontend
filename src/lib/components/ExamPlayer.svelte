@@ -1,37 +1,92 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
+	import { onMount } from 'svelte';
 	import Button from '$lib/components/Button.svelte';
-	import type { Exam } from '$lib/types';
+	import type { Exam, Question } from '$lib/types';
 
-	let { exam, onDone = () => {} } = $props<{
+	const TOTAL_MINUTES = 10;
+
+	let {
+		exam,
+		mistakeIds = [],
+		onDone = () => {}
+	} = $props<{
 		exam: Exam;
-		onDone?: () => void;
+		mistakeIds?: string[];
+		onDone?: (result: { score: number; total: number; answers: { questionId: string; selected: number; correct: boolean }[]; mistakes: { question: Question }[] }) => void;
 	}>();
 
 	let index = $state(0);
 	let selected = $state<number | null>(null);
 	let score = $state(0);
 	let completed = $state(false);
+	let timeLeft = $state(TOTAL_MINUTES * 60);
+	let timerActive = $state(true);
+	let answers = $state<{ questionId: string; selected: number; correct: boolean }[]>([]);
+	let newMistakes = $state<{ question: Question }[]>([]);
+
 	const current = $derived(exam.questions[index]);
 	const isCorrect = $derived(selected === current.correctAnswerIndex);
 	const progress = $derived(
-		Math.round((((completed ? exam.questions.length : index) + 1) / exam.questions.length) * 100)
+		Math.round((((completed ? exam.questions.length : index)) / exam.questions.length) * 100)
 	);
+	const minutes = $derived(Math.floor(timeLeft / 60));
+	const seconds = $derived(timeLeft % 60);
+	const timerClass = $derived(timeLeft <= 30 ? 'text-rose-300' : 'text-violet-200');
+
+	let timerInterval: ReturnType<typeof setInterval> | undefined;
+
+	onMount(() => {
+		timerInterval = setInterval(() => {
+			if (!timerActive || completed) return;
+			timeLeft -= 1;
+			if (timeLeft <= 0) {
+				timeLeft = 0;
+				timerActive = false;
+				finish();
+			}
+		}, 1000);
+
+		return () => {
+			if (timerInterval) clearInterval(timerInterval);
+		};
+	});
 
 	function choose(optionIndex: number) {
 		if (selected !== null) return;
 		selected = optionIndex;
-		if (optionIndex === current.correctAnswerIndex) score += 1;
+		timerActive = false;
+
+		const correct = optionIndex === current.correctAnswerIndex;
+		if (correct) {
+			score += 1;
+		} else {
+			if (!mistakeIds.includes(current.id)) {
+				newMistakes.push({ question: current });
+			}
+		}
+		answers.push({ questionId: current.id, selected: optionIndex, correct });
 	}
 
 	function next() {
 		if (index === exam.questions.length - 1) {
-			completed = true;
-			onDone();
+			finish();
 			return;
 		}
 		index += 1;
 		selected = null;
+		timerActive = true;
+	}
+
+	function finish() {
+		completed = true;
+		if (timerInterval) clearInterval(timerInterval);
+		onDone({
+			score,
+			total: exam.questions.length,
+			answers,
+			mistakes: newMistakes
+		});
 	}
 
 	function restart() {
@@ -39,6 +94,34 @@
 		selected = null;
 		score = 0;
 		completed = false;
+		timeLeft = TOTAL_MINUTES * 60;
+		timerActive = true;
+		answers = [];
+		newMistakes = [];
+		if (timerInterval) clearInterval(timerInterval);
+		timerInterval = setInterval(() => {
+			if (!timerActive || completed) return;
+			timeLeft -= 1;
+			if (timeLeft <= 0) {
+				timeLeft = 0;
+				timerActive = false;
+				finish();
+			}
+		}, 1000);
+	}
+
+	function questionLabel(q: Question, i: number) {
+		if (q.type === 'true-false') return `Question ${i + 1} (True / False)`;
+		if (q.type === 'fill-blank') return `Question ${i + 1} (Fill the blank)`;
+		return `Question ${i + 1}`;
+	}
+
+	function displayQuestion(text: string) {
+		return text.replace(/_{3,}/g, '__________');
+	}
+
+	function optionLabel(optionIndex: number) {
+		return String.fromCharCode(65 + optionIndex);
 	}
 </script>
 
@@ -47,6 +130,9 @@
 		<p class="eyebrow">Complete</p>
 		<h1 class="mt-4 text-6xl font-black text-white">{score}</h1>
 		<p class="mt-1 text-sm font-black text-violet-100">out of {exam.questions.length}</p>
+		{#if timeLeft <= 0 && !answers.length}
+			<p class="mt-3 text-sm font-bold text-rose-300">Time's up!</p>
+		{/if}
 		<p class="mx-auto mt-5 text-sm leading-6 text-violet-100 md:text-base">
 			{score >= 8
 				? 'Excellent command of the material.'
@@ -64,8 +150,11 @@
 	<section class="soft-card grid gap-5">
 		<div>
 			<div class="mb-3 flex items-center justify-between gap-3 px-1">
-				<p class="text-xs font-black text-violet-200">Question {index + 1} / {exam.questions.length}</p>
-				<p class="rounded-full bg-cyan-200/12 px-2.5 py-1 text-xs font-black capitalize text-cyan-200">{exam.difficulty}</p>
+				<p class="text-xs font-black text-violet-200">{questionLabel(current, index)}</p>
+				<div class="flex items-center gap-3">
+					<p class="rounded-full bg-cyan-200/12 px-2.5 py-1 text-xs font-black capitalize text-cyan-200">{exam.difficulty}</p>
+					<p class="text-xs font-black {timerClass}">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</p>
+				</div>
 			</div>
 			<div class="h-2 overflow-hidden rounded-full bg-white/10">
 				<div
@@ -77,7 +166,7 @@
 
 		{#key index}
 			<article in:fly={{ x: 24, duration: 220 }} out:fade={{ duration: 120 }} class="grid gap-6">
-				<h2 class="text-2xl font-black leading-tight text-white">{current.question}</h2>
+				<h2 class="text-2xl font-black leading-tight text-white">{displayQuestion(current.question)}</h2>
 
 				<div class="grid gap-3">
 					{#each current.options as option, optionIndex}
@@ -95,6 +184,7 @@
 							disabled={selected !== null}
 							onclick={() => choose(optionIndex)}
 						>
+							<span class="mr-3 inline-block w-5 shrink-0 font-black">{optionLabel(optionIndex)}</span>
 							{option}
 						</button>
 					{/each}

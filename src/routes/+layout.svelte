@@ -4,7 +4,7 @@
 	import { page } from '$app/state';
 	import Button from '$lib/components/Button.svelte';
 	import Toasts from '$lib/components/Toasts.svelte';
-	import { authReady, initAuth, logout, user } from '$lib/auth';
+	import { authReady, initAuth, user } from '$lib/auth';
 	import '@fontsource/urbanist';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.png';
@@ -12,8 +12,8 @@
 	let { children } = $props();
 
 	const publicRoutes = ['/', '/login', '/signup'];
-	const isProtected = $derived(!publicRoutes.includes(page.url.pathname));
-	const isPublicRoute = $derived(publicRoutes.includes(page.url.pathname));
+	const isPublic = $derived(publicRoutes.includes(page.url.pathname) || page.url.pathname.startsWith('/shared/'));
+	const isProtected = $derived(!isPublic);
 
 	initAuth();
 
@@ -23,15 +23,11 @@
 		}
 	});
 
-	async function signOut() {
-		await logout();
-		goto('/');
-	}
-
 	const navItems = [
 		{ href: '/dashboard', label: 'Home', icon: 'H' },
 		{ href: '/generate', label: 'Create', icon: '+' },
-		{ href: '/exams', label: 'Library', icon: 'L' }
+		{ href: '/exams', label: 'Library', icon: 'L' },
+		{ href: '/profile', label: 'Profile', icon: 'P' }
 	];
 </script>
 
@@ -45,7 +41,7 @@
 			</a>
 
 			<div class="hidden items-center gap-1 sm:flex">
-				{#if $user && !isPublicRoute}
+				{#if $user && !isPublic}
 					{#each navItems as item}
 						<a
 							class={[
@@ -63,24 +59,20 @@
 			</div>
 
 			<div class="flex items-center gap-2">
-				{#if $user}
-					<Button variant="secondary" class="px-4 py-2" onclick={signOut}>
-						Sign out
-					</Button>
-				{:else}
+				{#if !$user && !isPublic}
 					<Button href="/login" variant="secondary" class="px-4 py-2">Log in</Button>
 				{/if}
 			</div>
 		</nav>
 	</header>
 
-	<main class={['app-content pb-28 pt-4 md:pb-12 md:pt-6', (!$user || isPublicRoute) && 'pb-8']}>
+	<main class={['app-content pb-28 pt-4 md:pb-12 md:pt-6', (!$user || isPublic) && 'pb-8']}>
 		{@render children()}
 	</main>
 
-	{#if $user && !isPublicRoute}
+	{#if $user && !isPublic}
 		<nav class="bottom-nav fixed inset-x-0 bottom-0 z-40 sm:hidden">
-			<div class="mx-auto grid max-w-md grid-cols-3 gap-1 p-2">
+			<div class="mx-auto grid max-w-md grid-cols-4 gap-1 p-2">
 				{#each navItems as item}
 					<a
 						class={[
