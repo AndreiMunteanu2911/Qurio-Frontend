@@ -4,7 +4,7 @@
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
 	import StreakBadge from '$lib/components/StreakBadge.svelte';
 	import XpBar from '$lib/components/XpBar.svelte';
-	import { listExams, listMistakes, listResults } from '$lib/api';
+	import { listExams, listMistakes, listProgress, listResults } from '$lib/api';
 	import { user } from '$lib/auth';
 	import { pushToast } from '$lib/toasts';
 	import type { Exam, ExamResult } from '$lib/types';
@@ -12,6 +12,7 @@
 
 	let exams = $state<Exam[]>([]);
 	let results = $state<ExamResult[]>([]);
+	let progressExamIds = $state<string[]>([]);
 	let mistakeCount = $state(0);
 	let loading = $state(true);
 
@@ -21,12 +22,15 @@
 			exams = e; results = r; mistakeCount = m.length;
 		}
 		catch (error) { pushToast(error instanceof Error ? error.message : 'Unable to load dashboard.', 'error'); }
+		try { const p = await listProgress(); progressExamIds = p.examIds; } catch { /* ok */ }
 		finally { loading = false; }
 	});
 
+	const inProgress = $derived(new Set(progressExamIds));
+
 	const recent = $derived(exams.slice(0, 6));
 	const questionCount = $derived(exams.reduce((total, exam) => total + exam.questions.length, 0));
-	const firstName = $derived(($user?.email ?? 'learner').split('@')[0]);
+	const displayName = $derived($user?.displayName || ($user?.email ?? 'learner').split('@')[0]);
 	const bestScores = $derived.by(() => {
 		const m = new Map<string, { score: number; total: number }>();
 		for (const r of results) {
@@ -46,7 +50,7 @@
 	<section class="page-stack">
 		<div class="card-accent violet">
 			<p class="eyebrow">Dashboard</p>
-			<h1 class="mt-1.5 text-2xl font-black leading-tight text-white sm:text-3xl">Ready, {firstName}?</h1>
+			<h1 class="mt-1.5 text-2xl font-black leading-tight text-white sm:text-3xl">Ready, {displayName}?</h1>
 			<p class="mt-1.5 text-sm leading-6" style="color: var(--text-muted); max-width: 400px;">
 				Create a fresh exam or revisit your latest practice set.
 			</p>
@@ -90,6 +94,7 @@
 								<p class="mt-0.5 text-xs font-bold" style="color: var(--text-muted);">
 									{exam.questions.length} questions
 									{#if best}<span style="color: var(--cyan);"> · Best: {best.score}/{best.total}</span>{/if}
+									<span style="color: var(--cyan);"> · {inProgress.has(exam.id) ? 'Resume' : 'Start'}</span>
 								</p>
 							</div>
 							<p class="tag tag-violet shrink-0">{exam.difficulty}</p>

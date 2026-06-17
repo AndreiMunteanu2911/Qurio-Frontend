@@ -1,8 +1,8 @@
 import { PUBLIC_API_BASE_URL } from '$env/static/public';
 import { getIdToken } from './auth';
 import type {
-  ApiErrorPayload, CompleteExamResponse, Difficulty, Exam, ExamResult,
-  Mistake, ShareLink, XpData, StreakData, Achievement
+  ApiErrorPayload, CompleteExamResponse, Difficulty, Exam, ExamProgress,
+  ExamProgressResponse, ExamResult, Mistake, ShareLink, XpData, StreakData, Achievement
 } from './types';
 
 const apiBase = PUBLIC_API_BASE_URL || 'http://localhost:8081';
@@ -137,4 +137,23 @@ export function getStreak() {
 
 export function getAchievements() {
   return request<Achievement[]>('/api/achievements');
+}
+
+export function saveProgress(data: ExamProgress) {
+  return request<{ saved: boolean }>('/api/exams/progress', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  });
+}
+
+export function listProgress() {
+  return request<{ examIds: string[] }>('/api/exams/progress');
+}
+
+export function getProgress(examId: string) {
+  return request<ExamProgressResponse>(`/api/exams/progress/${examId}`);
+}
+
+export function clearProgress(examId: string) {
+  return request<void>(`/api/exams/progress/${examId}`, { method: 'DELETE' });
 }

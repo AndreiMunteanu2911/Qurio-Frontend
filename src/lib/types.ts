@@ -82,6 +82,18 @@ export type ApiErrorPayload = {
   };
 };
 
+export type ExamProgress = {
+  examId: string;
+  currentIndex: number;
+  answers: { questionId: string; selected: number; correct: boolean }[];
+  score: number;
+  updatedAt?: string;
+};
+
+export type ExamProgressResponse = {
+  hasProgress: boolean;
+} & Partial<ExamProgress>;
+
 export const CATEGORIES: Category[] = [
   'biology', 'chemistry', 'physics', 'mathematics', 'computer-science',
   'engineering', 'medicine', 'psychology', 'sociology', 'economics',

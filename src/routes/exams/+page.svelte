@@ -4,13 +4,14 @@
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
 	import ModalWrapper from '$lib/components/ModalWrapper.svelte';
 	import Select from '$lib/components/Select.svelte';
-	import { deleteExam, listExams, listResults } from '$lib/api';
+	import { deleteExam, listExams, listProgress, listResults } from '$lib/api';
 	import { pushToast } from '$lib/toasts';
 	import type { Category, Difficulty, Exam, ExamResult } from '$lib/types';
 	import { IconSearch } from '@tabler/icons-svelte';
 
 	let exams = $state<Exam[]>([]);
 	let results = $state<ExamResult[]>([]);
+	let progressExamIds = $state<string[]>([]);
 	let loading = $state(true);
 	let query = $state('');
 	let difficulty = $state<Difficulty | 'all'>('all');
@@ -21,10 +22,16 @@
 
 	async function load() {
 		loading = true;
-		try { const [e, r] = await Promise.all([listExams(), listResults()]); exams = e; results = r; }
+		try {
+			const [e, r] = await Promise.all([listExams(), listResults()]);
+			exams = e; results = r;
+		}
 		catch (error) { pushToast(error instanceof Error ? error.message : 'Unable to load exams.', 'error'); }
+		try { const p = await listProgress(); progressExamIds = p.examIds; } catch { /* ok */ }
 		finally { loading = false; }
 	}
+
+	const inProgress = $derived(new Set(progressExamIds));
 
 	const bestScores = $derived.by(() => {
 		const m = new Map<string, { score: number; total: number }>();
@@ -100,11 +107,12 @@
 									<p class="text-xs font-bold" style="color: var(--text-muted);">
 										{new Date(exam.createdAt).toLocaleDateString()} — 10 questions
 										{#if best}<span style="color: var(--cyan);"> · Best: {best.score}/{best.total}</span>{/if}
+										{#if inProgress.has(exam.id)}<span class="tag tag-cyan" style="font-size: 0.6rem;">Resume</span>{/if}
 										<span class="tag tag-surface" style="font-size: 0.6rem;">{exam.category}</span>
 									</p>
 								</a>
 								<div class="flex gap-2">
-									<Button href={`/exam/${exam.id}`} class="flex-1 py-2 text-xs">Continue</Button>
+									<Button href={`/exam/${exam.id}`} class="flex-1 py-2 text-xs">{inProgress.has(exam.id) ? 'Resume' : 'Start'}</Button>
 									<Button variant="danger" class="py-2 text-xs" onclick={() => (examToDelete = exam)}>Delete</Button>
 								</div>
 							</div>

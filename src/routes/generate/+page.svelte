@@ -5,7 +5,7 @@
 	import SegmentedControl from '$lib/components/SegmentedControl.svelte';
 	import { pushToast } from '$lib/toasts';
 	import type { Difficulty } from '$lib/types';
-	import { IconPlayerPlay } from '@tabler/icons-svelte';
+	import { IconPlayerPlay, IconLoader } from '@tabler/icons-svelte';
 
 	let prompt = $state('');
 	let difficulty = $state<Difficulty>('medium');
@@ -57,8 +57,21 @@
 				<p>{promptLength < 20 ? 'Need 20+' : 'Ready'}</p>
 			</div>
 			<Button type="submit" disabled={loading || promptLength < 20}>
-				{loading ? 'Generating...' : 'Generate exam'} <IconPlayerPlay size={16} stroke-width={2.5} />
+				{#if loading}
+					<IconLoader size={16} stroke-width={2.5} class="spin" /> Generating...
+				{:else}
+					Generate exam <IconPlayerPlay size={16} stroke-width={2.5} />
+				{/if}
 			</Button>
 		</form>
 	</div>
 </section>
+
+<style>
+	:global(.spin) {
+		animation: spin 0.8s linear infinite;
+	}
+	@keyframes spin {
+		to { rotate: 360deg; }
+	}
+</style>

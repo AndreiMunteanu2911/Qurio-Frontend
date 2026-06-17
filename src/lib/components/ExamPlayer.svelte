@@ -10,20 +10,28 @@
 	let {
 		exam,
 		mistakeIds = [],
-		onDone = () => {}
+		onDone = () => {},
+		onProgressChange = () => {},
+		initialIndex = 0,
+		initialAnswers = [],
+		initialScore = 0
 	} = $props<{
 		exam: Exam;
 		mistakeIds?: string[];
 		onDone?: (result: { score: number; total: number; answers: { questionId: string; selected: number; correct: boolean }[]; mistakes: { question: Question }[] }) => void;
+		onProgressChange?: (data: { currentIndex: number; answers: { questionId: string; selected: number; correct: boolean }[]; score: number }) => void;
+		initialIndex?: number;
+		initialAnswers?: { questionId: string; selected: number; correct: boolean }[];
+		initialScore?: number;
 	}>();
 
-	let index = $state(0);
+	let index = $state(initialIndex);
 	let selected = $state<number | null>(null);
-	let score = $state(0);
+	let score = $state(initialScore);
 	let completed = $state(false);
 	let timeLeft = $state(TOTAL_MINUTES * 60);
 	let timerActive = $state(true);
-	let answers = $state<{ questionId: string; selected: number; correct: boolean }[]>([]);
+	let answers = $state<{ questionId: string; selected: number; correct: boolean }[]>([...initialAnswers]);
 	let newMistakes = $state<{ question: Question }[]>([]);
 
 	const current = $derived(exam.questions[index]);
@@ -51,22 +59,26 @@
 			newMistakes = [...newMistakes, { question: current }];
 		}
 		answers = [...answers, { questionId: current.id, selected: optionIndex, correct: optionIndex === current.correctAnswerIndex }];
+		onProgressChange({ currentIndex: index, answers, score });
 	}
 
 	function next() {
 		if (index === exam.questions.length - 1) { finish(); return; }
 		index += 1; selected = null; timerActive = true;
+		onProgressChange({ currentIndex: index, answers, score });
 	}
 
 	function finish() {
 		completed = true;
 		if (timerInterval) clearInterval(timerInterval);
 		onDone({ score, total: exam.questions.length, answers, mistakes: newMistakes });
+		onProgressChange({ currentIndex: -1, answers: [], score: 0 });
 	}
 
 	function restart() {
 		index = 0; selected = null; score = 0; completed = false;
 		timeLeft = TOTAL_MINUTES * 60; timerActive = true; answers = []; newMistakes = [];
+		onProgressChange({ currentIndex: -1, answers: [], score: 0 });
 		if (timerInterval) clearInterval(timerInterval);
 		timerInterval = setInterval(() => {
 			if (!timerActive || completed) return;
