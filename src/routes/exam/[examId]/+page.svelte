@@ -7,7 +7,7 @@
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import ModalWrapper from '$lib/components/ModalWrapper.svelte';
-	import { getExam, completeExam, getProgress, saveProgress, clearProgress } from '$lib/api';
+	import { getExam, completeExam, getProgress, saveProgress, clearProgress, getInventory, useItem } from '$lib/api';
 	import { pushToast } from '$lib/toasts';
 	import { IconX } from '@tabler/icons-svelte';
 	import type { Exam } from '$lib/types';
@@ -17,6 +17,8 @@
 	let showShare = $state(false);
 	let showExitModal = $state(false);
 	let xpAwarded = $state<number | null>(null);
+	let levelsGained = $state(0);
+	let currencyAwarded = $state<number>(0);
 	let newAchievements = $state<{ name: string }[]>([]);
 	let showGamification = $state(false);
 
@@ -25,14 +27,17 @@
 	let progressScore = $state(0);
 	let hasProgress = $state(false);
 
+	let powerUps = $state<{ itemId: string; quantity: number }[]>([]);
+
 	const examId = $derived(page.params.examId!);
 	const title = $derived(exam ? `${exam.title} — Qurio` : 'Exam — Qurio');
 
 	onMount(async () => {
 		try {
-			exam = await getExam(examId);
-		}
-		catch (error) { pushToast(error instanceof Error ? error.message : 'Unable to load exam.', 'error'); }
+			const [e, inv] = await Promise.all([getExam(examId), getInventory()]);
+			exam = e;
+			powerUps = (inv.items ?? []).filter((i) => i.itemId === 'hint' || i.itemId === 'skip' || i.itemId === 'second_chance' || i.itemId === 'double_xp');
+		} catch (error) { pushToast(error instanceof Error ? error.message : 'Unable to load exam.', 'error'); }
 		try {
 			const p = await getProgress(examId);
 			if (p.hasProgress && p.currentIndex !== undefined && p.currentIndex >= 0) {
@@ -45,7 +50,21 @@
 		finally { loading = false; }
 	});
 
-	async function handleDone(result: { score: number; total: number; answers: { questionId: string; selected: number; correct: boolean }[] }) {
+	async function handleUseItem(itemId: string) {
+		try {
+			await useItem(itemId);
+			powerUps = powerUps.map((p) =>
+				p.itemId === itemId ? { ...p, quantity: p.quantity - 1 } : p
+			);
+		} catch { pushToast('Failed to use item.', 'error'); }
+	}
+
+	async function handleDone(result: {
+		score: number; total: number;
+		answers: { questionId: string; selected: number; correct: boolean }[];
+		powerUpsUsed: string[];
+		secondChanceCorrected: number;
+	}) {
 		const e = exam;
 		if (!e) return;
 		try {
@@ -58,6 +77,8 @@
 				answers: result.answers
 			});
 			xpAwarded = res.xp.awarded;
+			levelsGained = res.xp.levelsGained;
+			currencyAwarded = res.currencyAwarded ?? 0;
 			newAchievements = res.newAchievements.map((a) => ({ name: a.name }));
 			showGamification = true;
 		} catch { pushToast('Failed to save results.', 'error'); }
@@ -66,17 +87,12 @@
 
 	async function handleProgressChange(data: { currentIndex: number; answers: { questionId: string; selected: number; correct: boolean }[]; score: number }) {
 		try {
-			if (data.currentIndex < 0) {
-				await clearProgress(examId);
-			} else {
-				await saveProgress({ examId, ...data });
-			}
+			if (data.currentIndex < 0) { await clearProgress(examId); }
+			else { await saveProgress({ examId, ...data }); }
 		} catch { /* silent */ }
 	}
 
-	function exitExam() {
-		goto('/exams');
-	}
+	function exitExam() { goto('/exams'); }
 
 	async function copyLink() {
 		try { await navigator.clipboard.writeText(`${window.location.origin}/shared/${exam?.id}`); pushToast('Share link copied!', 'success'); }
@@ -89,7 +105,7 @@
 {#if loading}
 	<div style="padding: 1.125rem;"><LoadingCard label="Loading exam..." /></div>
 {:else if exam}
-	<div style="display: flex; flex-direction: column; height: 100dvh;">
+	<div style="display: flex; flex-direction: column; height: 100dvh; background: var(--exam-bg, var(--bg));">
 		<div style="display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding-block: 0.375rem 0.5rem;">
 			<Button variant="ghost" class="px-2 py-2 text-xs leading-none" onclick={() => (showExitModal = true)}>
 				<IconX size={16} stroke-width={2} />
@@ -114,6 +130,8 @@
 				initialIndex={hasProgress ? progressIndex : 0}
 				initialAnswers={hasProgress ? progressAnswers : []}
 				initialScore={hasProgress ? progressScore : 0}
+				{powerUps}
+				onUseItem={handleUseItem}
 			/>
 		</div>
 
@@ -121,6 +139,12 @@
 			<div in:fly={{ y: 8, duration: 200 }} style="flex-shrink: 0; padding-block: 0.5rem;">
 				<div class="card" style="text-align: center;">
 					<p class="text-sm font-black" style="color: var(--cyan);">+{xpAwarded} XP</p>
+					{#if levelsGained > 0}
+						<p class="mt-0.5 text-xs font-bold text-white">Leveled up! +{levelsGained * 25} bonus coins</p>
+					{/if}
+					{#if currencyAwarded > 0}
+						<p class="mt-0.5 text-xs font-bold" style="color: #ffc800;">+{currencyAwarded} coins</p>
+					{/if}
 					{#each newAchievements as ach}
 						<p class="mt-1 text-xs font-bold text-white">{ach.name} unlocked</p>
 					{/each}

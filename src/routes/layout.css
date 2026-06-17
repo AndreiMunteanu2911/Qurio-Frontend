@@ -350,6 +350,64 @@ button, a, input, select, textarea {
 .bottom-nav-link:hover { background: rgb(255 255 255 / 0.04); }
 .bottom-nav-link.active { background: white; color: #12072d; }
 
+/* ---- Card skins ---- */
+.card-skin-minimal .card,
+.card-skin-minimal .card-sm,
+.card-skin-minimal .card-accent {
+	border: 1px solid rgb(255 255 255 / 0.04);
+	background: transparent;
+}
+.card-skin-minimal .stat-card {
+	background: transparent;
+	border: 1px solid rgb(255 255 255 / 0.04);
+}
+
+.card-skin-gradient .card,
+.card-skin-gradient .card-sm,
+.card-skin-gradient .card-accent {
+	border: 1px solid transparent;
+	background-clip: padding-box;
+	position: relative;
+}
+.card-skin-gradient .card::before,
+.card-skin-gradient .card-sm::before,
+.card-skin-gradient .card-accent::before {
+	content: '';
+	position: absolute;
+	inset: -1px;
+	border-radius: inherit;
+	background: linear-gradient(135deg, var(--violet), var(--cyan));
+	z-index: -1;
+}
+
+.card-skin-neon .card,
+.card-skin-neon .card-sm,
+.card-skin-neon .card-accent {
+	box-shadow: 0 0 12px rgb(104 73 255 / 0.2), 0 0 4px rgb(105 239 247 / 0.1);
+}
+
+.card-skin-glass .card,
+.card-skin-glass .card-sm,
+.card-skin-glass .card-accent {
+	background: rgb(19 10 43 / 0.6);
+	backdrop-filter: blur(12px);
+	border: 1px solid rgb(255 255 255 / 0.06);
+}
+
+.card-skin-classic .card,
+.card-skin-classic .card-sm,
+.card-skin-classic .card-accent {
+	background: var(--surface);
+	border: none;
+}
+
+/* ---- Exam themes ---- */
+html[data-exam-theme='theme_midnight'] { --exam-bg: #0c1445; }
+html[data-exam-theme='theme_sunset'] { --exam-bg: #2d1b2e; }
+html[data-exam-theme='theme_forest'] { --exam-bg: #0a1f14; }
+html[data-exam-theme='theme_ocean'] { --exam-bg: #0a1f2e; }
+html[data-exam-theme='theme_galaxy'] { --exam-bg: #0e0820; }
+
 /* ---- Legacy aliases ---- */
 .soft-card { border-radius: var(--radius); background: var(--surface); padding: 1.25rem; }
 .soft-panel { border-radius: var(--radius); background: var(--surface-2); padding: 1.25rem; }

@@ -3,6 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import Button from '$lib/components/Button.svelte';
+	import CosmeticsApplier from '$lib/components/CosmeticsApplier.svelte';
+	import CurrencyBadge from '$lib/components/CurrencyBadge.svelte';
 	import StreakBadge from '$lib/components/StreakBadge.svelte';
 	import Toasts from '$lib/components/Toasts.svelte';
 	import XpBar from '$lib/components/XpBar.svelte';
@@ -10,7 +12,7 @@
 	import '@fontsource/urbanist';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.png';
-	import { IconDashboard, IconPlus, IconBooks, IconUser } from '@tabler/icons-svelte';
+	import { IconDashboard, IconPlus, IconBooks, IconUser, IconShoppingCart } from '@tabler/icons-svelte';
 
 	let { children } = $props();
 
@@ -33,11 +35,14 @@
 		{ href: '/dashboard', label: 'Home', icon: IconDashboard },
 		{ href: '/generate', label: 'Create', icon: IconPlus },
 		{ href: '/exams', label: 'Library', icon: IconBooks },
+		{ href: '/shop', label: 'Shop', icon: IconShoppingCart },
 		{ href: '/profile', label: 'Profile', icon: IconUser }
 	];
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
+
+<CosmeticsApplier />
 
 <div class="app-shell">
 	<!-- No top bar on exam pages -->
@@ -67,6 +72,7 @@
 						{#if $user && !isPublic}
 							<XpBar compact />
 							<StreakBadge />
+							<CurrencyBadge />
 						{/if}
 						{#if !$user && !isPublic}
 							<Button href="/login" variant="secondary" class="px-4 py-2">Log in</Button>
@@ -89,7 +95,7 @@
 
 	{#if $user && !isPublic && !isExamPage}
 		<nav class="fixed inset-x-0 bottom-0 z-40 bg-[#0b041c] sm:hidden">
-			<div class="mx-auto grid max-w-md grid-cols-4 gap-1 p-2">
+			<div class="mx-auto grid max-w-md grid-cols-5 gap-1 p-2">
 				{#each navItems as item}
 					<a
 						class={['bottom-nav-link', page.url.pathname === item.href ? 'active' : '']}

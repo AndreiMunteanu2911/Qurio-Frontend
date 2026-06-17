@@ -19,14 +19,24 @@
 		} catch { /* silent */ }
 	});
 
-	const xpInLevel = $derived(totalXp % 100);
-	const pct = $derived(xpInLevel / 100);
+	function cumulativeXpForLevel(lv: number): number {
+		if (lv <= 1) return 0;
+		return Math.floor(25 * (lv - 1) * (lv + 6) / 2);
+	}
+
+	function xpForNextLevel(lv: number): number {
+		return 100 + (lv - 1) * 25;
+	}
+
+	const xpInLevel = $derived(totalXp - cumulativeXpForLevel(level));
+	const needed = $derived(xpForNextLevel(level));
+	const pct = $derived(needed > 0 ? xpInLevel / needed : 0);
 </script>
 
 <div class="xp-bar {compact ? 'xp-compact' : ''}">
 	<div class="xp-label">
 		<span class="xp-level">Lv.{level}</span>
-		<span class="xp-count">{xpInLevel}/100 XP</span>
+		<span class="xp-count">{xpInLevel}/{needed} XP</span>
 	</div>
 	<div class="xp-track"><div class="xp-fill" style="width: {pct * 100}%;"></div></div>
 </div>

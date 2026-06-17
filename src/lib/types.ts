@@ -66,9 +66,10 @@ export type Achievement = {
 
 export type CompleteExamResponse = {
   result: ExamResult;
-  xp: XpData & { awarded: number };
+  xp: XpData & { awarded: number; levelsGained: number };
   streak: StreakData;
   newAchievements: { id: string; name: string; description: string; unlockedAt: string }[];
+  currencyAwarded: number;
 };
 
 export type ShareLink = {
@@ -93,6 +94,26 @@ export type ExamProgress = {
 export type ExamProgressResponse = {
   hasProgress: boolean;
 } & Partial<ExamProgress>;
+
+export type ShopItemType = 'power-up' | 'accent' | 'title' | 'card-skin' | 'avatar-border' | 'exam-theme';
+
+export type ShopItem = {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  type: ShopItemType;
+  consumable: boolean;
+};
+
+export type CurrencyData = {
+  balance: number;
+};
+
+export type InventoryData = {
+  items: { itemId: string; quantity: number; acquiredAt: string }[];
+  activeCosmetics: Record<string, string>;
+};
 
 export const CATEGORIES: Category[] = [
   'biology', 'chemistry', 'physics', 'mathematics', 'computer-science',

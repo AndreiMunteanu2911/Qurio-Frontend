@@ -1,8 +1,8 @@
 import { PUBLIC_API_BASE_URL } from '$env/static/public';
 import { getIdToken } from './auth';
 import type {
-  ApiErrorPayload, CompleteExamResponse, Difficulty, Exam, ExamProgress,
-  ExamProgressResponse, ExamResult, Mistake, ShareLink, XpData, StreakData, Achievement
+  ApiErrorPayload, CompleteExamResponse, CurrencyData, Difficulty, Exam, ExamProgress,
+  ExamProgressResponse, ExamResult, InventoryData, Mistake, ShareLink, XpData, StreakData, Achievement
 } from './types';
 
 const apiBase = PUBLIC_API_BASE_URL || 'http://localhost:8081';
@@ -156,4 +156,33 @@ export function getProgress(examId: string) {
 
 export function clearProgress(examId: string) {
   return request<void>(`/api/exams/progress/${examId}`, { method: 'DELETE' });
+}
+
+export function getCurrency() {
+  return request<CurrencyData>('/api/currency');
+}
+
+export function getInventory() {
+  return request<InventoryData>('/api/inventory');
+}
+
+export function purchaseItem(itemId: string) {
+  return request<{ balance: number; owned: boolean }>('/api/inventory/purchase', {
+    method: 'POST',
+    body: JSON.stringify({ itemId })
+  });
+}
+
+export function useItem(itemId: string) {
+  return request<{ used: boolean; remaining: number }>('/api/inventory/use', {
+    method: 'POST',
+    body: JSON.stringify({ itemId })
+  });
+}
+
+export function equipCosmetic(itemId: string | null, slot: string) {
+  return request<{ activeCosmetics: Record<string, string> }>('/api/inventory/equip', {
+    method: 'POST',
+    body: JSON.stringify({ itemId, slot })
+  });
 }

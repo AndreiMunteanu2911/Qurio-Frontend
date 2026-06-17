@@ -42,7 +42,7 @@
 
 <svelte:head><title>{exam?.title ?? 'Shared Exam'} — Qurio</title></svelte:head>
 
-<div style="display: flex; flex-direction: column; height: 100dvh;">
+<div style="display: flex; flex-direction: column; height: 100dvh; background: var(--exam-bg, var(--bg));">
 	{#if loading}
 		<LoadingCard label="Loading exam..." />
 	{:else if !exam}

@@ -4,6 +4,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import ScrollbarContainer from '$lib/components/ScrollbarContainer.svelte';
 	import type { Exam, Question } from '$lib/types';
+	import { IconBulb, IconArrowRight, IconRotate } from '@tabler/icons-svelte';
 
 	const TOTAL_MINUTES = 10;
 
@@ -14,15 +15,25 @@
 		onProgressChange = () => {},
 		initialIndex = 0,
 		initialAnswers = [],
-		initialScore = 0
+		initialScore = 0,
+		powerUps = [],
+		onUseItem = async (_itemId: string) => {},
 	} = $props<{
 		exam: Exam;
 		mistakeIds?: string[];
-		onDone?: (result: { score: number; total: number; answers: { questionId: string; selected: number; correct: boolean }[]; mistakes: { question: Question }[] }) => void;
+		onDone?: (result: {
+			score: number; total: number;
+			answers: { questionId: string; selected: number; correct: boolean }[];
+			mistakes: { question: Question }[];
+			powerUpsUsed: string[];
+			secondChanceCorrected: number;
+		}) => void;
 		onProgressChange?: (data: { currentIndex: number; answers: { questionId: string; selected: number; correct: boolean }[]; score: number }) => void;
 		initialIndex?: number;
 		initialAnswers?: { questionId: string; selected: number; correct: boolean }[];
 		initialScore?: number;
+		powerUps?: { itemId: string; quantity: number }[];
+		onUseItem?: (itemId: string) => Promise<void>;
 	}>();
 
 	let index = $state(initialIndex);
@@ -33,8 +44,21 @@
 	let timerActive = $state(true);
 	let answers = $state<{ questionId: string; selected: number; correct: boolean }[]>([...initialAnswers]);
 	let newMistakes = $state<{ question: Question }[]>([]);
+	let powerUpsUsed = $state<string[]>([]);
+	let revealedOptions = $state<Set<number>>(new Set());
+	let hintUsedThisQ = $state(false);
+	let secondChanceActive = $state(false);
+	let secondChanceQ = $state<{ index: number; question: Question } | null>(null);
+	let secondChanceAnswered = $state(false);
+	let secondChanceCorrected = $state(0);
 
-	const current = $derived(exam.questions[index]);
+	const ownPowerUps = $derived(new Set(powerUps.filter((p) => p.quantity > 0).map((p) => p.itemId)));
+
+	const current = $derived(
+		secondChanceActive && secondChanceQ ? secondChanceQ.question : exam.questions[index]
+	);
+	const currentIndex = $derived(secondChanceActive && secondChanceQ ? secondChanceQ.index : index);
+	const isDone = $derived(secondChanceActive ? secondChanceAnswered : false);
 	const isCorrect = $derived(selected === current.correctAnswerIndex);
 	const minutes = $derived(Math.floor(timeLeft / 60));
 	const seconds = $derived(timeLeft % 60);
@@ -52,8 +76,19 @@
 
 	function choose(optionIndex: number) {
 		if (selected !== null) return;
+		if (revealedOptions.has(optionIndex)) return;
 		selected = optionIndex;
 		timerActive = false;
+
+		if (secondChanceActive && secondChanceQ) {
+			secondChanceAnswered = true;
+			if (optionIndex === current.correctAnswerIndex) {
+				secondChanceCorrected += 1;
+				score += 1;
+			}
+			return;
+		}
+
 		if (optionIndex === current.correctAnswerIndex) score += 1;
 		else if (!mistakeIds.includes(current.id)) {
 			newMistakes = [...newMistakes, { question: current }];
@@ -62,22 +97,86 @@
 		onProgressChange({ currentIndex: index, answers, score });
 	}
 
-	function next() {
+	async function useHint() {
+		if (!ownPowerUps.has('hint') || hintUsedThisQ || selected !== null) return;
+		hintUsedThisQ = true;
+		await onUseItem('hint');
+		powerUpsUsed = [...powerUpsUsed, 'hint'];
+		const wrong = current.options
+			.map((_, i) => i)
+			.filter((i) => i !== current.correctAnswerIndex && !revealedOptions.has(i));
+		if (wrong.length > 0) {
+			const pick = wrong[Math.floor(Math.random() * wrong.length)];
+			revealedOptions = new Set([...revealedOptions, pick]);
+		}
+	}
+
+	async function useSkip() {
+		if (!ownPowerUps.has('skip') || selected !== null) return;
+		await onUseItem('skip');
+		powerUpsUsed = [...powerUpsUsed, 'skip'];
 		if (index === exam.questions.length - 1) { finish(); return; }
-		index += 1; selected = null; timerActive = true;
+		index += 1; selected = null; timerActive = true; hintUsedThisQ = false; revealedOptions = new Set();
 		onProgressChange({ currentIndex: index, answers, score });
+	}
+
+	function next() {
+		if (secondChanceActive) {
+			secondChanceActive = false; secondChanceQ = null; secondChanceAnswered = false;
+			finish();
+			return;
+		}
+
+		if (index === exam.questions.length - 1) {
+			if (ownPowerUps.has('second_chance') && !powerUpsUsed.includes('second_chance') && score < exam.questions.length) {
+				// Offer second chance
+				return;
+			}
+			finish(); return;
+		}
+		index += 1; selected = null; timerActive = true; hintUsedThisQ = false; revealedOptions = new Set();
+		onProgressChange({ currentIndex: index, answers, score });
+	}
+
+	async function activateSecondChance() {
+		await onUseItem('second_chance');
+		powerUpsUsed = [...powerUpsUsed, 'second_chance'];
+		// Find first wrong answer
+		const wrongIdx = answers.findIndex((a) => !a.correct);
+		if (wrongIdx >= 0) {
+			secondChanceQ = { index: wrongIdx, question: exam.questions[wrongIdx] };
+			secondChanceActive = true;
+			secondChanceAnswered = false;
+			selected = null;
+			hintUsedThisQ = false;
+			revealedOptions = new Set();
+			timerActive = true;
+		} else {
+			finish();
+		}
+	}
+
+	function skipSecondChance() {
+		finish();
 	}
 
 	function finish() {
 		completed = true;
 		if (timerInterval) clearInterval(timerInterval);
-		onDone({ score, total: exam.questions.length, answers, mistakes: newMistakes });
+		onDone({
+			score, total: exam.questions.length, answers,
+			mistakes: newMistakes,
+			powerUpsUsed,
+			secondChanceCorrected
+		});
 		onProgressChange({ currentIndex: -1, answers: [], score: 0 });
 	}
 
 	function restart() {
 		index = 0; selected = null; score = 0; completed = false;
 		timeLeft = TOTAL_MINUTES * 60; timerActive = true; answers = []; newMistakes = [];
+		powerUpsUsed = []; revealedOptions = new Set(); hintUsedThisQ = false;
+		secondChanceActive = false; secondChanceQ = null; secondChanceAnswered = false; secondChanceCorrected = 0;
 		onProgressChange({ currentIndex: -1, answers: [], score: 0 });
 		if (timerInterval) clearInterval(timerInterval);
 		timerInterval = setInterval(() => {
@@ -113,15 +212,31 @@
 {:else}
 	<div style="display: flex; flex-direction: column; height: 100%; gap: 0;">
 		<!-- Progress + meta -->
-		<div style="margin-bottom: 0.625rem; flex-shrink: 0;">
+		<div style="margin-bottom: 0.5rem; flex-shrink: 0;">
 			<div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.375rem;">
 				<div style="display: flex; align-items: center; gap: 0.375rem;">
-					<span class="text-xs font-bold" style="color: var(--text-muted);">{index + 1}/{exam.questions.length}</span>
+					<span class="text-xs font-bold" style="color: var(--text-muted);">{currentIndex + 1}/{exam.questions.length}</span>
 					<span class="tag tag-violet">
 						{current.type === 'true-false' ? 'T/F' : current.type === 'fill-blank' ? 'Fill' : 'MCQ'}
 					</span>
 				</div>
 				<div style="display: flex; align-items: center; gap: 0.375rem;">
+					{#if ownPowerUps.has('hint') && !hintUsedThisQ && selected === null && !secondChanceActive}
+						<button
+							class="pressable flex h-6 w-6 items-center justify-center rounded-full"
+							style="background: rgb(255 200 0 / 0.12); color: #ffc800;"
+							onclick={useHint}
+							title="Hint: reveal a wrong option"
+						><IconBulb size={13} stroke-width={2} /></button>
+					{/if}
+					{#if ownPowerUps.has('skip') && selected === null && !secondChanceActive}
+						<button
+							class="pressable flex h-6 w-6 items-center justify-center rounded-full"
+							style="background: var(--surface-3); color: var(--text-muted);"
+							onclick={useSkip}
+							title="Skip this question"
+						><IconArrowRight size={13} stroke-width={2} /></button>
+					{/if}
 					<span class="tag tag-cyan">{exam.difficulty}</span>
 					<span class="text-xs font-bold" style="color: var(--text-muted); font-variant-numeric: tabular-nums;">
 						{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
@@ -135,13 +250,16 @@
 			</div>
 		</div>
 
-		{#key index}
+		{#key currentIndex + (secondChanceActive ? '_sc' : '')}
 			<div in:fly={{ x: 10, duration: 160 }} style="display: flex; flex-direction: column; flex: 1; gap: 0.625rem; min-height: 0;">
 				<!-- Question (scrollable if long) -->
 				<ScrollbarContainer style="flex: 1; min-height: 0;">
 					<h2 class="text-xl font-black leading-snug text-white sm:text-2xl">
 						{displayQ(current.question)}
 					</h2>
+					{#if secondChanceActive}
+						<p class="mt-2 text-xs font-bold" style="color: var(--cyan);">Second chance — retry one wrong answer</p>
+					{/if}
 				</ScrollbarContainer>
 
 				<!-- Explanation (in the middle after answering) -->
@@ -161,11 +279,12 @@
 							<button
 								class={[
 									'option',
+									revealedOptions.has(optionIndex) ? 'reveal' : '',
 									selected === null ? '' :
 										optionIndex === current.correctAnswerIndex ? 'correct' :
 										selected === optionIndex ? 'incorrect' : 'reveal'
 								]}
-								disabled={selected !== null}
+								disabled={selected !== null || revealedOptions.has(optionIndex)}
 								onclick={() => choose(optionIndex)}
 							>
 								<span class="letter">{optLabel(optionIndex)}</span>
@@ -175,10 +294,20 @@
 					</div>
 					<!-- Reserved space so options don't jump when button appears -->
 					<div style="min-height: 3rem;">
-						{#if selected !== null}
+						{#if isDone}
+							<Button class="w-full" onclick={next}>Continue</Button>
+						{:else if selected !== null}
+							<!-- Second chance: last question's Continue leads to finish -->
 							<Button class="w-full" onclick={next}>
-								{index === exam.questions.length - 1 ? 'See score' : 'Continue'}
+								{secondChanceActive || index === exam.questions.length - 1 ? 'See score' : 'Continue'}
 							</Button>
+						{:else if !secondChanceActive && index === exam.questions.length - 1 && ownPowerUps.has('second_chance') && !powerUpsUsed.includes('second_chance') && score < exam.questions.length}
+							<div style="display: flex; gap: 0.5rem;">
+								<Button variant="violet" class="flex-1" onclick={activateSecondChance}>
+									<IconRotate size={14} stroke-width={2} /> Second chance
+								</Button>
+								<Button variant="ghost" class="flex-1" onclick={finish}>Finish</Button>
+							</div>
 						{/if}
 					</div>
 				</div>
