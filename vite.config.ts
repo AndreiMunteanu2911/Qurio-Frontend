@@ -1,7 +1,10 @@
 import tailwindcss from '@tailwindcss/vite';
-import adapter from '@sveltejs/adapter-vercel';
+import vercelAdapter from '@sveltejs/adapter-vercel';
+import staticAdapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
+
+const isCapacitorBuild = process.env.CAPACITOR_BUILD === 'true';
 
 export default defineConfig({
 	plugins: [
@@ -12,7 +15,15 @@ export default defineConfig({
 				runes: ({ filename }) =>
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			adapter: adapter()
+			adapter: isCapacitorBuild
+				? staticAdapter({
+					pages: 'build',
+					assets: 'build',
+					fallback: 'index.html',
+					precompress: false,
+					strict: false
+				})
+				: vercelAdapter()
 		})
 	]
 });

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Qurio</string>
+    <string name="title_activity_main">Qurio</string>
+    <string name="package_name">com.andreimunteanu.qurio</string>
+    <string name="custom_url_scheme">com.andreimunteanu.qurio</string>
+</resources>
