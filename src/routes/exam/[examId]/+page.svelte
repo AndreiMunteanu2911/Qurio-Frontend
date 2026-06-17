@@ -72,6 +72,7 @@
 				examId: e.id,
 				examTitle: e.title,
 				difficulty: e.difficulty,
+				category: e.category,
 				score: result.score,
 				totalQuestions: result.total,
 				answers: result.answers

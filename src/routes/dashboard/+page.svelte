@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Button from '$lib/components/Button.svelte';
+	import DailyLoginModal from '$lib/components/DailyLoginModal.svelte';
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
 	import StreakBadge from '$lib/components/StreakBadge.svelte';
 	import XpBar from '$lib/components/XpBar.svelte';
-	import { listExams, listMistakes, listProgress, listResults } from '$lib/api';
+	import { claimLogin, claimQuest, getDaily, listExams, listMistakes, listProgress, listResults } from '$lib/api';
 	import { user } from '$lib/auth';
 	import { pushToast } from '$lib/toasts';
-	import type { Exam, ExamResult } from '$lib/types';
-	import { IconPlus, IconChartBar, IconAlertTriangle } from '@tabler/icons-svelte';
+	import type { DailyData, Exam, ExamResult } from '$lib/types';
+	import { IconCoin, IconPlus, IconChartBar, IconAlertTriangle, IconCheck, IconRotate } from '@tabler/icons-svelte';
 
 	let exams = $state<Exam[]>([]);
 	let results = $state<ExamResult[]>([]);
@@ -16,18 +17,43 @@
 	let mistakeCount = $state(0);
 	let loading = $state(true);
 
+	// Daily features
+	let dailyData = $state<DailyData | null>(null);
+	let showLoginModal = $state(false);
+	let loginCoins = $state(0);
+	let loginStreak = $state(1);
+	let claimingLogin = $state(false);
+
+	// Quest
+	let questClaiming = $state(false);
+
 	onMount(async () => {
 		try {
 			const [e, r, m] = await Promise.all([listExams(), listResults(), listMistakes()]);
 			exams = e; results = r; mistakeCount = m.length;
-		}
-		catch (error) { pushToast(error instanceof Error ? error.message : 'Unable to load dashboard.', 'error'); }
-		try { const p = await listProgress(); progressExamIds = p.examIds; } catch { /* ok */ }
+		} catch { /* ok */ }
+		try {
+			const p = await listProgress();
+			progressExamIds = p.examIds;
+		} catch { /* ok */ }
+
+		// Load daily data
+		try {
+			const dd = await getDaily();
+			dailyData = dd;
+
+			if (dd.canClaimLogin) {
+				loginStreak = dd.loginStreak || 1;
+				loginCoins = 5 + (dd.loginStreak > 1 ? 1 : 0);
+				showLoginModal = true;
+			}
+
+		} catch { /* ok */ }
+
 		finally { loading = false; }
 	});
 
 	const inProgress = $derived(new Set(progressExamIds));
-
 	const recent = $derived(exams.slice(0, 6));
 	const questionCount = $derived(exams.reduce((total, exam) => total + exam.questions.length, 0));
 	const displayName = $derived($user?.displayName || ($user?.email ?? 'learner').split('@')[0]);
@@ -40,6 +66,35 @@
 		}
 		return m;
 	});
+
+	const quest = $derived(dailyData?.dailyQuest ?? null);
+	const questPct = $derived(quest ? Math.min(quest.progress / quest.target * 100, 100) : 0);
+
+	async function handleClaimLogin() {
+		claimingLogin = true;
+		try {
+			const res = await claimLogin();
+			showLoginModal = false;
+			pushToast(`+${res.coinsAwarded} coins — daily login bonus`, 'success');
+			if (dailyData) dailyData.loginClaimedToday = true;
+		} catch (error) {
+			pushToast(error instanceof Error ? error.message : 'Failed to claim bonus.', 'error');
+		}
+		finally { claimingLogin = false; }
+	}
+
+	async function handleClaimQuest() {
+		questClaiming = true;
+		try {
+			const res = await claimQuest();
+			pushToast(`+${res.coinsAwarded} coins — quest completed!`, 'success');
+			if (dailyData?.dailyQuest) dailyData.dailyQuest.completed = false; // hide after claim
+		} catch (error) {
+			pushToast(error instanceof Error ? error.message : 'Failed to claim quest reward.', 'error');
+		}
+		finally { questClaiming = false; }
+	}
+
 </script>
 
 <svelte:head><title>Dashboard — Qurio</title></svelte:head>
@@ -67,6 +122,40 @@
 			<StreakBadge />
 		</div>
 
+		<!-- Daily quest -->
+		{#if quest}
+			<div class="card-sm" style="border: 1px solid rgb(255 200 0 / 0.2);">
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-2">
+						<div class="flex h-8 w-8 items-center justify-center rounded-lg" style="background: rgb(255 200 0 / 0.1);">
+							<IconRotate size={16} stroke-width={2} style="color: #ffc800;" />
+						</div>
+						<div>
+							<p class="text-xs font-black text-white">{quest.name}</p>
+							<p class="text-[0.6rem] font-bold" style="color: var(--text-muted);">{quest.description}</p>
+						</div>
+					</div>
+					{#if quest.completed && !quest.claimed}
+						<Button variant="secondary" class="px-3 py-1.5 text-xs" disabled={questClaiming} onclick={handleClaimQuest}>
+							{questClaiming ? '...' : `Claim ${quest.reward}`}
+							<IconCoin size={12} stroke-width={2} />
+						</Button>
+					{:else if quest.claimed}
+						<span class="flex items-center gap-1 text-[0.6rem] font-bold" style="color: var(--text-muted);">
+							<IconCheck size={12} stroke-width={2} /> Claimed
+						</span>
+					{/if}
+				</div>
+				<div class="mt-2 flex items-center gap-2">
+					<div class="h-1.5 flex-1 rounded-full" style="background: var(--surface-2);">
+						<div class="h-full rounded-full" style="width: {questPct}%; background: #ffc800; transition: width 0.3s;"></div>
+					</div>
+					<span class="text-[0.6rem] font-bold" style="color: var(--text-muted);">{quest.progress}/{quest.target}</span>
+				</div>
+			</div>
+		{/if}
+
+		<!-- Actions -->
 		<div class="card-grid card-grid-2">
 			<Button href="/generate" class="w-full" style="padding-block: 0.75rem;">
 				<IconPlus size={16} stroke-width={2.5} /> Create exam
@@ -79,6 +168,7 @@
 			</Button>
 		</div>
 
+		<!-- Recent practice -->
 		<div class="card">
 			<div class="mb-3 flex items-center justify-between gap-3">
 				<h2 class="text-lg font-black text-white">Recent practice</h2>
@@ -108,4 +198,14 @@
 			</div>
 		</div>
 	</section>
+{/if}
+
+<!-- Daily login modal -->
+{#if showLoginModal}
+	<DailyLoginModal
+		{loginStreak}
+		coinsAwarded={loginCoins}
+		onClaim={handleClaimLogin}
+		onClose={() => (showLoginModal = false)}
+	/>
 {/if}

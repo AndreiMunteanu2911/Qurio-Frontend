@@ -1,7 +1,7 @@
 import { PUBLIC_API_BASE_URL } from '$env/static/public';
 import { getIdToken } from './auth';
 import type {
-  ApiErrorPayload, CompleteExamResponse, CurrencyData, Difficulty, Exam, ExamProgress,
+  ApiErrorPayload, CompleteExamResponse, CurrencyData, DailyData, Difficulty, Exam, ExamProgress,
   ExamProgressResponse, ExamResult, InventoryData, Mistake, ShareLink, XpData, StreakData, Achievement
 } from './types';
 
@@ -117,6 +117,7 @@ export function completeExam(data: {
   examId: string;
   examTitle: string;
   difficulty: Difficulty;
+  category?: string;
   score: number;
   totalQuestions: number;
   answers: { questionId: string; selected: number; correct: boolean }[];
@@ -185,4 +186,16 @@ export function equipCosmetic(itemId: string | null, slot: string) {
     method: 'POST',
     body: JSON.stringify({ itemId, slot })
   });
+}
+
+export function getDaily() {
+  return request<DailyData>('/api/daily');
+}
+
+export function claimLogin() {
+  return request<{ coinsAwarded: number; loginStreak: number }>('/api/daily/claim-login', { method: 'POST' });
+}
+
+export function claimQuest() {
+  return request<{ coinsAwarded: number }>('/api/daily/claim-quest', { method: 'POST' });
 }

@@ -115,6 +115,22 @@ export type InventoryData = {
   activeCosmetics: Record<string, string>;
 };
 
+export type DailyData = {
+  loginStreak: number;
+  loginClaimedToday: boolean;
+  canClaimLogin: boolean;
+  dailyQuest: {
+    id: string;
+    name: string;
+    description: string;
+    target: number;
+    reward: number;
+    progress: number;
+    completed: boolean;
+    claimed: boolean;
+  } | null;
+};
+
 export const CATEGORIES: Category[] = [
   'biology', 'chemistry', 'physics', 'mathematics', 'computer-science',
   'engineering', 'medicine', 'psychology', 'sociology', 'economics',
