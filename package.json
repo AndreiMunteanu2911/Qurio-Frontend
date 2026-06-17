@@ -43,6 +43,7 @@
 	"dependencies": {
 		"@capacitor/android": "^8.4.0",
 		"@capacitor/core": "^8.4.0",
+		"@fontsource/urbanist": "^5.2.7",
 		"firebase": "^12.7.0"
 	}
 }

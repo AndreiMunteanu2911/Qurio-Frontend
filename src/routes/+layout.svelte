@@ -5,6 +5,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import Toasts from '$lib/components/Toasts.svelte';
 	import { authReady, initAuth, logout, user } from '$lib/auth';
+	import '@fontsource/urbanist';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.png';
 

@@ -22,6 +22,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Log In — Qurio</title>
+</svelte:head>
+
 <section class="page-stack py-2">
 	<div class="section-header">
 		<p class="eyebrow">Welcome back</p>

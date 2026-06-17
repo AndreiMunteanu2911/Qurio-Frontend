@@ -2,6 +2,10 @@
 	import Button from '$lib/components/Button.svelte';
 </script>
 
+<svelte:head>
+	<title>Qurio — AI Study Exams</title>
+</svelte:head>
+
 <section class="page-stack py-2">
 	<div class="section-header">
 		<p class="eyebrow">AI study exams</p>

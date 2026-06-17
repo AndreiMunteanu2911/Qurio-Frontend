@@ -10,6 +10,8 @@
 	let exam = $state<Exam | null>(null);
 	let loading = $state(true);
 
+	const title = $derived(exam ? `${exam.title} — Qurio` : 'Exam — Qurio');
+
 	onMount(async () => {
 		try {
 			exam = await getExam(page.params.examId);
@@ -20,6 +22,10 @@
 		}
 	});
 </script>
+
+<svelte:head>
+	<title>{title}</title>
+</svelte:head>
 
 {#if loading}
 	<LoadingCard label="Loading exam..." />

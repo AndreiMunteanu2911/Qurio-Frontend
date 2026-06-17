@@ -22,6 +22,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Sign Up — Qurio</title>
+</svelte:head>
+
 <section class="page-stack py-2">
 	<div class="section-header">
 		<p class="eyebrow">Start free</p>

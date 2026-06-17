@@ -27,6 +27,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Generate Exam — Qurio</title>
+</svelte:head>
+
 <section class="page-stack">
 	<div class="section-header">
 		<p class="eyebrow">Create</p>

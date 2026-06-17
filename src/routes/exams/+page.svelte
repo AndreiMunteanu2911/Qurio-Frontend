@@ -50,6 +50,10 @@
 	);
 </script>
 
+<svelte:head>
+	<title>Saved Exams — Qurio</title>
+</svelte:head>
+
 {#if loading}
 	<LoadingCard label="Loading saved exams..." />
 {:else}

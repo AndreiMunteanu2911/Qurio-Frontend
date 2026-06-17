@@ -26,6 +26,10 @@
 	const firstName = $derived(($user?.email ?? 'learner').split('@')[0]);
 </script>
 
+<svelte:head>
+	<title>Dashboard — Qurio</title>
+</svelte:head>
+
 {#if loading}
 	<LoadingCard label="Loading your dashboard..." />
 {:else}
