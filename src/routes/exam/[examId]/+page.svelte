@@ -30,6 +30,8 @@
 
 	let powerUps = $state<{ itemId: string; quantity: number }[]>([]);
 	let examKey = $state(0);
+	let showDoubleXpPrompt = $state(false);
+	let doubleXpActivated = $state(false);
 
 	const examId = $derived(page.params.examId!);
 	const title = $derived(exam ? `${exam.title} — Qurio` : 'Exam — Qurio');
@@ -59,6 +61,9 @@
 				const qs = shuffleArray(e.questions);
 				exam = { ...e, questions: qs };
 			}
+			if (!p?.hasProgress && (inv.items ?? []).some((i) => i.itemId === 'double_xp' && i.quantity > 0)) {
+				showDoubleXpPrompt = true;
+			}
 		} catch (error) { pushToast(error instanceof Error ? error.message : 'Unable to load exam.', 'error'); }
 		finally { loading = false; }
 	});
@@ -80,6 +85,7 @@
 	}) {
 		const e = exam;
 		if (!e) return;
+		const allPowerUps = doubleXpActivated ? [...result.powerUpsUsed, 'double_xp'] : result.powerUpsUsed;
 		try {
 			const res = await completeExam({
 				examId: e.id,
@@ -88,7 +94,8 @@
 				category: e.category,
 				score: result.score,
 				totalQuestions: result.total,
-				answers: result.answers
+				answers: result.answers,
+				powerUpsUsed: allPowerUps
 			});
 			xpAwarded = res.xp.awarded;
 			levelsGained = res.xp.levelsGained;
@@ -119,6 +126,12 @@
 		const qs = shuffleArray(exam.questions);
 		exam = { ...exam, questions: qs };
 		examKey += 1;
+	}
+
+	async function activateDoubleXp() {
+		await handleUseItem('double_xp');
+		doubleXpActivated = true;
+		showDoubleXpPrompt = false;
 	}
 </script>
 
@@ -177,6 +190,16 @@
 			</div>
 		{/if}
 	</div>
+
+	<ModalWrapper open={showDoubleXpPrompt} title="Double XP available!" onClose={() => (showDoubleXpPrompt = false)}>
+		<p class="text-sm leading-6" style="color: var(--text-muted);">
+			You have a <strong class="text-white">Double XP</strong> power-up. Activate it to earn 2x XP for answering questions on this exam.
+		</p>
+		{#snippet footer()}
+			<Button variant="ghost" class="flex-1" onclick={() => (showDoubleXpPrompt = false)}>Skip</Button>
+			<Button class="flex-1" onclick={activateDoubleXp}>Use it</Button>
+		{/snippet}
+	</ModalWrapper>
 
 	<ModalWrapper open={showExitModal} title="Exit exam?" onClose={() => (showExitModal = false)}>
 		<p class="text-sm leading-6" style="color: var(--text-muted);">

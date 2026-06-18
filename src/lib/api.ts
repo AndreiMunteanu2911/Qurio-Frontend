@@ -121,6 +121,7 @@ export function completeExam(data: {
   score: number;
   totalQuestions: number;
   answers: { questionId: string; selected: number; correct: boolean }[];
+  powerUpsUsed?: string[];
 }) {
   return request<CompleteExamResponse>('/api/exams/complete', {
     method: 'POST',
