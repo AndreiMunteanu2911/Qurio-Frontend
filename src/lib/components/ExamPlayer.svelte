@@ -18,6 +18,7 @@
 		initialScore = 0,
 		powerUps = [],
 		onUseItem = async (_itemId: string) => {},
+		onRestart = () => {},
 	} = $props<{
 		exam: Exam;
 		mistakeIds?: string[];
@@ -34,6 +35,7 @@
 		initialScore?: number;
 		powerUps?: { itemId: string; quantity: number }[];
 		onUseItem?: (itemId: string) => Promise<void>;
+		onRestart?: () => void;
 	}>();
 
 	let index = $state(initialIndex);
@@ -173,6 +175,7 @@
 	}
 
 	function restart() {
+		onRestart();
 		index = 0; selected = null; score = 0; completed = false;
 		timeLeft = TOTAL_MINUTES * 60; timerActive = true; answers = []; newMistakes = [];
 		powerUpsUsed = []; revealedOptions = new Set(); hintUsedThisQ = false;

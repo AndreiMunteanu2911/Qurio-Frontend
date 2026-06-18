@@ -29,6 +29,7 @@
 	let hasProgress = $state(false);
 
 	let powerUps = $state<{ itemId: string; quantity: number }[]>([]);
+	let examKey = $state(0);
 
 	const examId = $derived(page.params.examId!);
 	const title = $derived(exam ? `${exam.title} — Qurio` : 'Exam — Qurio');
@@ -112,6 +113,13 @@
 		try { await navigator.clipboard.writeText(`${window.location.origin}/shared/${exam?.id}`); pushToast('Share link copied!', 'success'); }
 		catch { pushToast('Failed to copy link.', 'error'); }
 	}
+
+	function handleRestart() {
+		if (!exam) return;
+		const qs = shuffleArray(exam.questions);
+		exam = { ...exam, questions: qs };
+		examKey += 1;
+	}
 </script>
 
 <svelte:head><title>{title}</title></svelte:head>
@@ -137,16 +145,19 @@
 			</div>
 		</div>
 		<div style="flex: 1; min-height: 0;">
-			<ExamPlayer
-				{exam}
-				onDone={handleDone}
-				onProgressChange={handleProgressChange}
-				initialIndex={hasProgress ? progressIndex : 0}
-				initialAnswers={hasProgress ? progressAnswers : []}
-				initialScore={hasProgress ? progressScore : 0}
-				{powerUps}
-				onUseItem={handleUseItem}
-			/>
+			{#key examKey}
+				<ExamPlayer
+					{exam}
+					onDone={handleDone}
+					onProgressChange={handleProgressChange}
+					initialIndex={hasProgress ? progressIndex : 0}
+					initialAnswers={hasProgress ? progressAnswers : []}
+					initialScore={hasProgress ? progressScore : 0}
+					{powerUps}
+					onUseItem={handleUseItem}
+					onRestart={handleRestart}
+				/>
+			{/key}
 		</div>
 
 		{#if showGamification}
