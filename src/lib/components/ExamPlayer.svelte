@@ -216,9 +216,6 @@
 			<div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.375rem;">
 				<div style="display: flex; align-items: center; gap: 0.375rem;">
 					<span class="text-xs font-bold" style="color: var(--text-muted);">{currentIndex + 1}/{exam.questions.length}</span>
-					<span class="tag tag-violet">
-						{current.type === 'true-false' ? 'T/F' : current.type === 'fill-blank' ? 'Fill' : 'MCQ'}
-					</span>
 				</div>
 				<div style="display: flex; align-items: center; gap: 0.375rem;">
 					{#if ownPowerUps.has('hint') && !hintUsedThisQ && selected === null && !secondChanceActive}
@@ -238,9 +235,32 @@
 						><IconArrowRight size={13} stroke-width={2} /></button>
 					{/if}
 					<span class="tag tag-cyan">{exam.difficulty}</span>
-					<span class="text-xs font-bold" style="color: var(--text-muted); font-variant-numeric: tabular-nums;">
-						{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-					</span>
+					<svg width="40" height="40" viewBox="0 0 48 48" style="display: block; flex-shrink: 0;">
+						<circle cx="24" cy="24" r="20" fill="none" stroke="rgb(255 255 255 / 0.08)" stroke-width="3.5"/>
+						<circle
+							cx="24"
+							cy="24"
+							r="20"
+							fill="none"
+							stroke-width="3.5"
+							stroke-linecap="round"
+							stroke-dasharray="125.66"
+							stroke-dashoffset={125.66 * (1 - timeLeft / (TOTAL_MINUTES * 60))}
+							transform="rotate(-90 24 24)"
+							style="stroke: var(--accent); transition: stroke-dashoffset 1s linear;"
+						/>
+						<text
+							x="24"
+							y="24"
+							text-anchor="middle"
+							dominant-baseline="central"
+							font-size="11"
+							font-weight="800"
+							font-family="var(--font-sans)"
+							fill="var(--text)"
+							style="font-variant-numeric: tabular-nums;"
+						>{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</text>
+					</svg>
 				</div>
 			</div>
 			<div class="progress-seg">

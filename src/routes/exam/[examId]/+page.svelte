@@ -33,21 +33,32 @@
 	const examId = $derived(page.params.examId!);
 	const title = $derived(exam ? `${exam.title} — Qurio` : 'Exam — Qurio');
 
+	function shuffleArray<T>(arr: T[]): T[] {
+		const a = [...arr];
+		for (let i = a.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[a[i], a[j]] = [a[j], a[i]];
+		}
+		return a;
+	}
+
 	onMount(async () => {
 		try {
 			const [e, inv] = await Promise.all([getExam(examId), getInventory()]);
-			exam = e;
 			powerUps = (inv.items ?? []).filter((i) => i.itemId === 'hint' || i.itemId === 'skip' || i.itemId === 'second_chance' || i.itemId === 'double_xp');
-		} catch (error) { pushToast(error instanceof Error ? error.message : 'Unable to load exam.', 'error'); }
-		try {
-			const p = await getProgress(examId);
-			if (p.hasProgress && p.currentIndex !== undefined && p.currentIndex >= 0) {
+
+			const p = await getProgress(examId).catch(() => null);
+			if (p?.hasProgress && p.currentIndex !== undefined && p.currentIndex >= 0) {
 				hasProgress = true;
 				progressIndex = p.currentIndex;
 				progressAnswers = p.answers ?? [];
 				progressScore = p.score ?? 0;
+				exam = e;
+			} else {
+				const qs = shuffleArray(e.questions);
+				exam = { ...e, questions: qs };
 			}
-		} catch { /* ok */ }
+		} catch (error) { pushToast(error instanceof Error ? error.message : 'Unable to load exam.', 'error'); }
 		finally { loading = false; }
 	});
 
