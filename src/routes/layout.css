@@ -340,6 +340,9 @@ button, a, input, select, textarea {
 
 .bottom-nav-link {
 	display: grid;
+	justify-items: center;
+	align-content: center;
+	gap: 0.15rem;
 	border-radius: var(--radius-sm);
 	padding: 0.5rem 0.625rem;
 	text-align: center;
