@@ -130,10 +130,6 @@
 		}
 
 		if (index === exam.questions.length - 1) {
-			if (ownPowerUps.has('second_chance') && !powerUpsUsed.includes('second_chance') && score < exam.questions.length) {
-				// Offer second chance
-				return;
-			}
 			finish(); return;
 		}
 		index += 1; selected = null; timerActive = true; hintUsedThisQ = false; revealedOptions = new Set();

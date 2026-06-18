@@ -411,6 +411,13 @@ html[data-exam-theme='theme_forest'] { --exam-bg: #0a1f14; }
 html[data-exam-theme='theme_ocean'] { --exam-bg: #0a1f2e; }
 html[data-exam-theme='theme_galaxy'] { --exam-bg: #0e0820; }
 
+/* ---- Level-up glow ---- */
+.level-up-glow {
+	background: linear-gradient(135deg, rgb(105 239 247 / 0.12), rgb(255 200 0 / 0.08));
+	border: 1px solid rgb(105 239 247 / 0.25);
+	box-shadow: 0 0 20px rgb(105 239 247 / 0.15);
+}
+
 /* ---- Legacy aliases ---- */
 .soft-card { border-radius: var(--radius); background: var(--surface); padding: 1.25rem; }
 .soft-panel { border-radius: var(--radius); background: var(--surface-2); padding: 1.25rem; }

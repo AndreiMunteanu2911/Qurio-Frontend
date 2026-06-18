@@ -7,14 +7,16 @@
 	import StreakBadge from '$lib/components/StreakBadge.svelte';
 	import TextField from '$lib/components/TextField.svelte';
 	import XpBar from '$lib/components/XpBar.svelte';
+	import { onDestroy } from 'svelte';
 	import { getCurrency, getInventory, listExams, listResults, listMistakes } from '$lib/api';
 	import { user, logout } from '$lib/auth';
 	import { pushToast } from '$lib/toasts';
+	import { badgeRefresh } from '$lib/refresh';
 	import { firebaseAuth } from '$lib/firebase';
 	import { updateProfile } from 'firebase/auth';
 	import type { CurrencyData, Exam, ExamResult, InventoryData, Mistake } from '$lib/types';
 	import { SHOP_ITEMS } from '$lib/shop';
-	import { IconCoin, IconEdit, IconLogout, IconAward, IconChartBar, IconShoppingCart } from '@tabler/icons-svelte';
+	import { IconCoin, IconEdit, IconLogout, IconAward, IconChartBar, IconShoppingCart, IconPalette } from '@tabler/icons-svelte';
 
 	let loading = $state(true);
 	let displayName = $state('');
@@ -25,6 +27,7 @@
 	let mistakes = $state<Mistake[]>([]);
 	let currency = $state<CurrencyData | null>(null);
 	let inventory = $state<InventoryData | null>(null);
+	let unsubBadge = () => {};
 	onMount(async () => {
 		try {
 			const [e, r, m, c, i] = await Promise.all([listExams(), listResults(), listMistakes(), getCurrency(), getInventory()]);
@@ -33,7 +36,15 @@
 		}
 		catch { /* ok */ }
 		finally { loading = false; }
+
+		unsubBadge = badgeRefresh.subscribe(async () => {
+			try {
+				const [c, i] = await Promise.all([getCurrency(), getInventory()]);
+				currency = c; inventory = i;
+			} catch { /* ok */ }
+		});
 	});
+	onDestroy(() => unsubBadge());
 
 	const activeTitle = $derived(
 		inventory?.activeCosmetics?.['title']
@@ -126,6 +137,9 @@
 			</Button>
 			<Button href="/achievements" variant="violet" class="w-full">
 				<IconAward size={14} stroke-width={2} /> Achievements
+			</Button>
+			<Button href="/customize" variant="secondary" class="w-full">
+				<IconPalette size={14} stroke-width={2} /> Customize
 			</Button>
 			<Button href="/shop" variant="secondary" class="w-full">
 				<IconShoppingCart size={14} stroke-width={2} /> Shop

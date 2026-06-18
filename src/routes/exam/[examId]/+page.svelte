@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { fly } from 'svelte/transition';
+	import { fly, scale } from 'svelte/transition';
 	import ExamPlayer from '$lib/components/ExamPlayer.svelte';
 	import LoadingCard from '$lib/components/LoadingCard.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -178,7 +178,12 @@
 				<div class="card" style="text-align: center;">
 					<p class="text-sm font-black" style="color: var(--cyan);">+{xpAwarded} XP</p>
 					{#if levelsGained > 0}
-						<p class="mt-0.5 text-xs font-bold text-white">Leveled up! +{levelsGained * 25} bonus coins</p>
+						<div in:scale={{ start: 0.5, duration: 400 }}>
+							<div class="level-up-glow mt-1 rounded-lg px-3 py-2">
+								<p class="text-sm font-black text-white">Leveled up!</p>
+								<p class="mt-0.5 text-xs font-bold" style="color: #ffc800;">+{levelsGained * 25} bonus coins</p>
+							</div>
+						</div>
 					{/if}
 					{#if currencyAwarded > 0}
 						<p class="mt-0.5 text-xs font-bold" style="color: #ffc800;">+{currencyAwarded} coins</p>

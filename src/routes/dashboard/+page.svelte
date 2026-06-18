@@ -45,7 +45,7 @@
 
 			if (dd.canClaimLogin) {
 				loginStreak = dd.loginStreak || 1;
-				loginCoins = 5 + (dd.loginStreak > 1 ? 1 : 0);
+				loginCoins = dd.loginBonus ?? 5;
 				showLoginModal = true;
 			}
 

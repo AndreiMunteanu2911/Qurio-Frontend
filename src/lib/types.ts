@@ -119,6 +119,7 @@ export type DailyData = {
   loginStreak: number;
   loginClaimedToday: boolean;
   canClaimLogin: boolean;
+  loginBonus?: number;
   dailyQuest: {
     id: string;
     name: string;

@@ -32,7 +32,13 @@
 	}
 	function next() {
 		if (!current || selected === null) return;
-		if (selected === current.correctAnswerIndex) deleteMistake(mistakes[reviewIndex!].id).catch(() => {});
+		if (selected === current.correctAnswerIndex) {
+			const id = mistakes[reviewIndex!].id;
+			deleteMistake(id).then(() => {
+				mistakes = mistakes.filter((m) => m.id !== id);
+				totalCount -= 1;
+			}).catch(() => {});
+		}
 		if (reviewIndex! >= reviewMistakes.length - 1) { completed = true; return; }
 		reviewIndex! += 1; selected = null;
 	}

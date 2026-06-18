@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { getInventory } from '$lib/api';
+	import { badgeRefresh } from '$lib/refresh';
 
 	let activeCosmetics = $state<Record<string, string>>({});
 
@@ -28,21 +29,26 @@
 		skin_classic: 'card-skin-classic',
 	};
 
-	onMount(async () => {
+	async function loadInventory() {
 		try {
 			const inv = await getInventory();
 			activeCosmetics = inv.activeCosmetics ?? {};
 		} catch { /* ok */ }
-
 		applyCosmetics();
+	}
+
+	let unsub = () => {};
+	onMount(() => {
+		loadInventory();
+		unsub = badgeRefresh.subscribe(() => loadInventory());
 	});
+	onDestroy(() => unsub());
 
 	function applyCosmetics() {
 		const root = document.documentElement;
 		root.removeAttribute('data-exam-theme');
 		root.classList.remove(...Object.values(SKIN_CLASSES));
 
-		// Accent color
 		const accentId = activeCosmetics['accent'];
 		if (accentId && ACCENT_COLORS[accentId]) {
 			const { accent, accentSoft } = ACCENT_COLORS[accentId];
@@ -53,13 +59,11 @@
 			root.style.setProperty('--accent-soft', 'rgb(105 239 247 / 0.1)');
 		}
 
-		// Exam theme
 		const themeId = activeCosmetics['examTheme'];
 		if (themeId && THEME_BGS[themeId]) {
 			root.dataset.examTheme = themeId;
 		}
 
-		// Card skin
 		const skinId = activeCosmetics['cardSkin'];
 		if (skinId && SKIN_CLASSES[skinId]) {
 			root.classList.add(SKIN_CLASSES[skinId]);
