@@ -34,6 +34,9 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
 
+      - name: Update npm
+        run: npm install -g npm@11.6.1
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -48,7 +51,7 @@ jobs:
           javac -version
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build mobile web bundle
         run: npm run build:mobile
