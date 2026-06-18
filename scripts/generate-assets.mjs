@@ -8,7 +8,7 @@ const root = join(__dirname, '..');
 const faviconPath = join(root, 'src', 'lib', 'assets', 'favicon.png');
 const resDir = join(root, 'android', 'app', 'src', 'main', 'res');
 
-const BG = '#090318';
+const BG = '#3e1751';
 
 function parseHex(c) {
   const h = c.replace('#', '');
