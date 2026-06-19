@@ -7,9 +7,9 @@
 	import ScrollbarContainer from '$lib/components/ScrollbarContainer.svelte';
 	import { getSharedExam } from '$lib/api';
 	import { pushToast } from '$lib/toasts';
-	import type { Question } from '$lib/types';
+	import type { ExamSettings, Question } from '$lib/types';
 
-	let exam = $state<{ id: string; title: string; difficulty: string; questions: Question[]; createdAt: string } | null>(null);
+	let exam = $state<{ id: string; title: string; difficulty: string; questions: Question[]; settings: ExamSettings; createdAt: string } | null>(null);
 	let loading = $state(true);
 	let index = $state(0);
 	let selected = $state<number | null>(null);
@@ -19,6 +19,8 @@
 	const examId = $derived(page.params.examId!);
 	const current = $derived(exam?.questions[index] ?? null);
 	const isCorrect = $derived(selected === current?.correctAnswerIndex);
+	const showImmediateExplanations = $derived((exam?.settings.explanationMode ?? 'immediate') === 'immediate');
+	const scoreRatio = $derived(exam && exam.questions.length > 0 ? score / exam.questions.length : 0);
 
 	onMount(async () => {
 		try { exam = await getSharedExam(examId); }
@@ -57,8 +59,25 @@
 			<h1 class="mt-5 text-7xl font-black text-white">{score}</h1>
 			<p class="mt-1 text-sm font-bold" style="color: var(--text-muted);">out of {exam.questions.length}</p>
 			<p class="mx-auto mt-3 max-w-xs text-sm leading-6" style="color: var(--text-muted);">
-				{score >= 8 ? 'You really know this material.' : score >= 5 ? 'Solid effort.' : 'Keep practicing.'}
+				{scoreRatio >= 0.8 ? 'You really know this material.' : scoreRatio >= 0.5 ? 'Solid effort.' : 'Keep practicing.'}
 			</p>
+			{#if !showImmediateExplanations}
+				<div class="mt-5 text-left">
+					<p class="mb-2 text-xs font-black" style="color: var(--text-muted);">Answer review</p>
+					<div class="grid gap-2 custom-scrollbar" style="max-height: 18rem; overflow: auto;">
+						{#each exam.questions as question, questionIndex}
+							<div class="rounded-lg p-3" style="background: var(--surface-2);">
+								<p class="text-xs font-black text-white">Question {questionIndex + 1}</p>
+								<p class="mt-2 text-sm font-bold leading-5 text-white">{displayQ(question.question)}</p>
+								<p class="mt-2 text-xs leading-5" style="color: var(--text-muted);">
+									Correct answer: <strong class="text-white">{question.options[question.correctAnswerIndex]}</strong>
+								</p>
+								<p class="mt-1 text-xs leading-5" style="color: var(--text-muted);">{question.explanation}</p>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
 			<div class="mt-7 grid gap-2">
 				<Button onclick={restart}>Retake</Button>
 				<Button href="/signup" variant="violet">Create an account</Button>
@@ -90,7 +109,11 @@
 						<p class="text-sm font-black" style="color: {isCorrect ? 'var(--correct)' : 'var(--incorrect)'};">
 							{isCorrect ? 'Correct' : 'Incorrect'}
 						</p>
-						<p class="mt-1 text-xs leading-5" style="color: var(--text-muted);">{current!.explanation}</p>
+						{#if showImmediateExplanations}
+							<p class="mt-1 text-xs leading-5" style="color: var(--text-muted);">{current!.explanation}</p>
+						{:else}
+							<p class="mt-1 text-xs leading-5" style="color: var(--text-muted);">Explanation saved for the final review.</p>
+						{/if}
 					</div>
 				{/if}
 

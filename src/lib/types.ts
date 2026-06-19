@@ -1,5 +1,16 @@
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type QuestionType = 'mcq' | 'true-false' | 'fill-blank';
+export type ExplanationMode = 'immediate' | 'end';
+export type ExamSettings = {
+  questionCount: number;
+  questionTypeMix: {
+    mcq: number;
+    trueFalse: number;
+    fillBlank: number;
+  };
+  timeLimitMinutes: number;
+  explanationMode: ExplanationMode;
+};
 export type Category =
   | 'biology' | 'chemistry' | 'physics' | 'mathematics' | 'computer-science'
   | 'engineering' | 'medicine' | 'psychology' | 'sociology' | 'economics'
@@ -23,6 +34,7 @@ export type Exam = {
   category: Category;
   title: string;
   questions: Question[];
+  settings: ExamSettings;
   createdAt: string;
 };
 

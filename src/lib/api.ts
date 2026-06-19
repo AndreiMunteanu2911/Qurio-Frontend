@@ -2,7 +2,7 @@ import { PUBLIC_API_BASE_URL } from '$env/static/public';
 import { getIdToken } from './auth';
 import type {
   ApiErrorPayload, CompleteExamResponse, CurrencyData, DailyData, Difficulty, Exam, ExamProgress,
-  ExamProgressResponse, ExamResult, InventoryData, Mistake, ShareLink, XpData, StreakData, Achievement
+  ExamProgressResponse, ExamResult, ExamSettings, InventoryData, Mistake, ShareLink, XpData, StreakData, Achievement
 } from './types';
 
 const apiBase = PUBLIC_API_BASE_URL || 'http://localhost:8081';
@@ -53,10 +53,10 @@ async function requestPublic<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-export function generateExam(prompt: string, difficulty: Difficulty) {
+export function generateExam(prompt: string, difficulty: Difficulty, settings: ExamSettings) {
   return request<Exam>('/api/exams/generate', {
     method: 'POST',
-    body: JSON.stringify({ prompt, difficulty })
+    body: JSON.stringify({ prompt, difficulty, settings })
   });
 }
 
@@ -73,7 +73,7 @@ export function deleteExam(examId: string) {
 }
 
 export function getSharedExam(examId: string) {
-  return requestPublic<{ id: string; title: string; difficulty: Difficulty; category: string; questions: Exam['questions']; createdAt: string }>(
+  return requestPublic<{ id: string; title: string; difficulty: Difficulty; category: string; questions: Exam['questions']; settings: ExamSettings; createdAt: string }>(
     `/api/shared/${examId}`
   );
 }

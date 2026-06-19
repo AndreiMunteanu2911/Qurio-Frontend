@@ -6,8 +6,6 @@
 	import type { Exam, Question } from '$lib/types';
 	import { IconBulb, IconArrowRight, IconRotate } from '@tabler/icons-svelte';
 
-	const TOTAL_MINUTES = 10;
-
 	let {
 		exam,
 		mistakeIds = [],
@@ -42,7 +40,7 @@
 	let selected = $state<number | null>(null);
 	let score = $state(initialScore);
 	let completed = $state(false);
-	let timeLeft = $state(TOTAL_MINUTES * 60);
+	let timeLeft = $state((exam.settings?.timeLimitMinutes ?? 10) * 60);
 	let timerActive = $state(true);
 	let answers = $state<{ questionId: string; selected: number; correct: boolean }[]>([...initialAnswers]);
 	let newMistakes = $state<{ question: Question }[]>([]);
@@ -62,6 +60,10 @@
 	const currentIndex = $derived(secondChanceActive && secondChanceQ ? secondChanceQ.index : index);
 	const isDone = $derived(secondChanceActive ? secondChanceAnswered : false);
 	const isCorrect = $derived(selected === current.correctAnswerIndex);
+	const timeLimitSeconds = $derived((exam.settings?.timeLimitMinutes ?? 10) * 60);
+	const showImmediateExplanations = $derived((exam.settings?.explanationMode ?? 'immediate') === 'immediate');
+	const answerMap = $derived(new Map(answers.map((answer) => [answer.questionId, answer])));
+	const scoreRatio = $derived(exam.questions.length > 0 ? score / exam.questions.length : 0);
 	const minutes = $derived(Math.floor(timeLeft / 60));
 	const seconds = $derived(timeLeft % 60);
 
@@ -173,7 +175,7 @@
 	function restart() {
 		onRestart();
 		index = 0; selected = null; score = 0; completed = false;
-		timeLeft = TOTAL_MINUTES * 60; timerActive = true; answers = []; newMistakes = [];
+		timeLeft = timeLimitSeconds; timerActive = true; answers = []; newMistakes = [];
 		powerUpsUsed = []; revealedOptions = new Set(); hintUsedThisQ = false;
 		secondChanceActive = false; secondChanceQ = null; secondChanceAnswered = false; secondChanceCorrected = 0;
 		onProgressChange({ currentIndex: -1, answers: [], score: 0 });
@@ -190,21 +192,44 @@
 </script>
 
 {#if completed}
-	<div in:fly={{ y: 12, duration: 180 }} class="card text-center" style="max-width: 480px;">
-		<p class="eyebrow">Complete</p>
-		<h1 class="mt-5 text-7xl font-black text-white">{score}</h1>
-		<p class="mt-1 text-sm font-bold" style="color: var(--text-muted);">out of {exam.questions.length}</p>
-		{#if timeLeft <= 0 && answers.length === 0}
-			<p class="mt-2 text-sm font-bold" style="color: var(--incorrect);">Time's up</p>
-		{/if}
-		<p class="mx-auto mt-3 max-w-xs text-sm leading-6" style="color: var(--text-muted);">
-			{score >= 8 ? 'You really know this material.' : score >= 5 ? 'Solid effort. A retake will lock it in.' : 'Each attempt builds understanding.'}
-		</p>
-		<div class="mt-7 grid gap-2 sm:grid-cols-2">
-			<Button onclick={restart} variant="primary" class="w-full">Retake</Button>
-			<Button href="/mistakes" variant="secondary" class="w-full">Mistakes</Button>
-			<Button href="/generate" variant="violet" class="w-full">New exam</Button>
-			<Button href="/dashboard" variant="secondary" class="w-full">Dashboard</Button>
+	<div class="grid h-full place-items-center overflow-auto p-4">
+		<div in:fly={{ y: 12, duration: 180 }} class="card w-full text-center" style="max-width: 480px;">
+			<p class="eyebrow">Complete</p>
+			<h1 class="mt-5 text-7xl font-black text-white">{score}</h1>
+			<p class="mt-1 text-sm font-bold" style="color: var(--text-muted);">out of {exam.questions.length}</p>
+			{#if timeLeft <= 0 && answers.length === 0}
+				<p class="mt-2 text-sm font-bold" style="color: var(--incorrect);">Time's up</p>
+			{/if}
+			<p class="mx-auto mt-3 max-w-xs text-sm leading-6" style="color: var(--text-muted);">
+				{scoreRatio >= 0.8 ? 'You really know this material.' : scoreRatio >= 0.5 ? 'Solid effort. A retake will lock it in.' : 'Each attempt builds understanding.'}
+			</p>
+			{#if !showImmediateExplanations}
+				<div class="mt-5 text-left">
+					<p class="mb-2 text-xs font-black" style="color: var(--text-muted);">Answer review</p>
+					<div class="grid gap-2 custom-scrollbar" style="max-height: 18rem; overflow: auto;">
+						{#each exam.questions as question, questionIndex}
+							{@const answer = answerMap.get(question.id)}
+							<div class="rounded-lg p-3" style="background: var(--surface-2);">
+								<div class="flex items-center justify-between gap-2">
+									<p class="text-xs font-black text-white">Question {questionIndex + 1}</p>
+									<span class={['tag', answer?.correct ? 'tag-cyan' : 'tag-violet']}>{answer?.correct ? 'Correct' : 'Missed'}</span>
+								</div>
+								<p class="mt-2 text-sm font-bold leading-5 text-white">{displayQ(question.question)}</p>
+								<p class="mt-2 text-xs leading-5" style="color: var(--text-muted);">
+									Correct answer: <strong class="text-white">{question.options[question.correctAnswerIndex]}</strong>
+								</p>
+								<p class="mt-1 text-xs leading-5" style="color: var(--text-muted);">{question.explanation}</p>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+			<div class="mt-7 grid gap-2 sm:grid-cols-2">
+				<Button onclick={restart} variant="primary" class="w-full">Retake</Button>
+				<Button href="/mistakes" variant="secondary" class="w-full">Mistakes</Button>
+				<Button href="/generate" variant="violet" class="w-full">New exam</Button>
+				<Button href="/dashboard" variant="secondary" class="w-full">Dashboard</Button>
+			</div>
 		</div>
 	</div>
 
@@ -244,7 +269,7 @@
 							stroke-width="3.5"
 							stroke-linecap="round"
 							stroke-dasharray="125.66"
-							stroke-dashoffset={125.66 * (1 - timeLeft / (TOTAL_MINUTES * 60))}
+							stroke-dashoffset={125.66 * (1 - timeLeft / timeLimitSeconds)}
 							transform="rotate(-90 24 24)"
 							style="stroke: var(--accent); transition: stroke-dashoffset 1s linear;"
 						/>
@@ -287,7 +312,11 @@
 						<p class="text-sm font-black" style="color: {isCorrect ? 'var(--correct)' : 'var(--incorrect)'};">
 							{isCorrect ? 'Correct' : 'Incorrect'}
 						</p>
-						<p class="mt-1 text-xs leading-5" style="color: var(--text-muted);">{current.explanation}</p>
+						{#if showImmediateExplanations}
+							<p class="mt-1 text-xs leading-5" style="color: var(--text-muted);">{current.explanation}</p>
+						{:else}
+							<p class="mt-1 text-xs leading-5" style="color: var(--text-muted);">Explanation saved for the final review.</p>
+						{/if}
 					</div>
 				{/if}
 
