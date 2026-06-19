@@ -35,7 +35,7 @@
 		</form>
 		<p class="mt-4 text-center text-xs font-bold" style="color: var(--text-muted);">
 			New to Qurio?
-			<a class="ml-1 text-white underline decoration-white/30 underline-offset-4 hover:text-cyan-200" href="/signup">Create an account</a>
+			<a class="ml-1 font-black underline underline-offset-4" style="color: var(--violet); text-decoration-color: rgb(104 73 255 / 0.35);" href="/signup">Create an account</a>
 		</p>
 	</div>
 </section>

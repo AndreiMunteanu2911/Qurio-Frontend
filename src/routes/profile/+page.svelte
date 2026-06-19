@@ -54,14 +54,14 @@
 	const activeBorder = $derived(inventory?.activeCosmetics?.['avatarBorder'] ?? null);
 	const BORDER_CSS: Record<string, string> = {
 		border_thin_gold: '2px solid #ffc800',
-		border_glow_violet: '0 0 0 3px #6849ff, 0 0 22px rgb(104 73 255 / 0.75)',
-		border_double_ring: '0 0 0 2px var(--bg), 0 0 0 5px var(--violet), 0 0 0 8px var(--cyan)',
-		border_dashed_cyan: '2px dashed var(--cyan)',
-		border_starburst: '0 0 0 2px var(--bg), 0 0 0 5px var(--accent), 0 0 28px rgb(105 239 247 / 0.65)',
-		border_lime_pulse: '0 0 0 4px #b6ff2e, 0 0 24px rgb(182 255 46 / 0.65)',
-		border_inferno: '0 0 0 4px #ff3045, 0 0 26px rgb(255 138 0 / 0.7)',
+		border_glow_violet: '0 0 0 4px #6849ff, 0 0 18px rgb(104 73 255 / 0.45)',
+		border_double_ring: '0 0 0 3px #ffffff, 0 0 0 6px var(--violet), 0 0 0 9px var(--cyan)',
+		border_dashed_cyan: '3px dashed var(--cyan)',
+		border_starburst: '0 0 0 3px #ffffff, 0 0 0 6px var(--cyan), 0 0 24px rgb(47 128 255 / 0.45)',
+		border_lime_pulse: '0 0 0 4px #9be12a, 0 0 18px rgb(155 225 42 / 0.45)',
+		border_inferno: '0 0 0 4px #ff5a6b, 0 0 20px rgb(255 90 107 / 0.4)',
 		border_prism: '0 0 0 3px #ff3f8e, 0 0 0 6px #7dd3fc, 0 0 0 9px #b6ff2e',
-		border_ice_shard: '0 0 0 3px #dff7ff, 0 0 0 6px #2f80ff, 0 0 24px rgb(125 211 252 / 0.72)',
+		border_ice_shard: '0 0 0 3px #dff7ff, 0 0 0 6px #2f80ff, 0 0 20px rgb(47 128 255 / 0.42)',
 	};
 
 	const questionCount = $derived(exams.reduce((t, e) => t + e.questions.length, 0));

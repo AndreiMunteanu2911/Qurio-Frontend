@@ -106,7 +106,7 @@
 				</div>
 
 				<div style="display: flex; flex-direction: column; gap: 0.625rem; margin-top: 0.625rem;">
-					<h2 class="text-lg font-black leading-snug text-white">{displayQ(current.question)}</h2>
+					<h2 class="text-lg font-black leading-snug" style="color: var(--text);">{displayQ(current.question)}</h2>
 
 					{#if selected !== null}
 						<div in:fly={{ y: 6, duration: 120 }} class="feedback {selected === current.correctAnswerIndex ? 'correct' : 'incorrect'}">

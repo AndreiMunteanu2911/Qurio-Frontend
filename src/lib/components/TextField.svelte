@@ -18,7 +18,7 @@
 	}>();
 </script>
 
-<label class="grid gap-2 text-sm font-extrabold text-violet-100">
+<label class="grid gap-2 text-sm font-black" style="color: var(--text-muted);">
 	{label}
 	<input class="field" {type} bind:value {required} {minlength} {maxlength} {placeholder} />
 </label>

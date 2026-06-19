@@ -50,7 +50,7 @@
 		<header class="app-header sticky top-0 z-40">
 			<div class="app-content">
 				<div class="app-header-inner">
-					<a href="/" class="group flex items-center gap-3 text-white">
+					<a href="/" class="group flex items-center gap-3" style="color: var(--text);">
 						<p class="text-xl font-black tracking-tight">Qurio</p>
 					</a>
 
@@ -68,7 +68,7 @@
 						</div>
 					{/if}
 
-					<div class="flex items-center gap-2">
+					<div class="flex shrink-0 items-center gap-2">
 						{#if $user && !isPublic}
 							<XpBar compact />
 							<StreakBadge />
@@ -94,8 +94,8 @@
 	</main>
 
 	{#if $user && !isPublic && !isExamPage}
-		<nav class="fixed inset-x-0 bottom-0 z-40 bg-[#0b041c] sm:hidden">
-			<div class="mx-auto grid max-w-md grid-cols-5 gap-1 p-2">
+		<nav class="fixed inset-x-0 bottom-0 z-40 sm:hidden">
+			<div class="mobile-nav-shell mx-auto mb-2 grid max-w-md grid-cols-5 gap-1 rounded-3xl p-2">
 				{#each navItems as item}
 					<a
 						class={['bottom-nav-link', page.url.pathname === item.href ? 'active' : '']}

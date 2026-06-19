@@ -26,14 +26,13 @@
 
 {#if open}
 	<div
-		class="fixed inset-0 z-50 grid place-items-end bg-black/70 p-3 sm:place-items-center"
+		class="fixed inset-0 z-50 grid place-items-end bg-[#130a2b]/55 p-3 backdrop-blur-sm sm:place-items-center"
 		transition:fade={{ duration: 120 }}
 		role="presentation"
 		onclick={onClose}
 	>
 		<div
-			class="w-full max-w-md rounded-xl p-5"
-			style="background: var(--surface);"
+			class="game-modal w-full max-w-md rounded-[1.5rem] border-2 border-[var(--border)] bg-white p-5 shadow-[0_10px_0_#d8cfff,0_22px_44px_rgb(56_38_115_/_0.2)]"
 			transition:scale={{ start: 0.94, duration: 140 }}
 			role="dialog"
 			aria-modal="true"
@@ -44,14 +43,14 @@
 		>
 			<div class="flex items-start justify-between gap-3">
 				<div class="min-w-0">
-					<h2 class="text-lg font-black text-white">{title}</h2>
+					<h2 class="text-lg font-black" style="color: var(--text);">{title}</h2>
 					{#if description}
 						<p class="mt-1.5 text-sm leading-5" style="color: var(--text-muted);">{description}</p>
 					{/if}
 				</div>
 				<button
-					class="grid h-8 w-8 shrink-0 place-items-center rounded-lg font-black"
-					style="background: var(--surface-2); color: var(--text-muted);"
+					class="grid h-8 w-8 shrink-0 place-items-center rounded-xl border-2 font-black shadow-[0_4px_0_#d8cfff]"
+					style="background: var(--surface-2); border-color: var(--border); color: var(--violet);"
 					type="button"
 					aria-label="Close"
 					onclick={onClose}
@@ -74,3 +73,9 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	:global(.game-modal .text-white) {
+		color: var(--text) !important;
+	}
+</style>

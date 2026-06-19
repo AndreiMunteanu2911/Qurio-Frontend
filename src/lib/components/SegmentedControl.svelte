@@ -8,15 +8,15 @@
 	}>();
 </script>
 
-<div class="grid gap-2" style={`grid-template-columns: repeat(${options.length}, minmax(0, 1fr));`}>
+<div class="segmented" style={`grid-template-columns: repeat(${options.length}, minmax(0, 1fr));`}>
 	{#each options as option}
 		<button
 			type="button"
 			class={[
-				'rounded-lg border px-3 py-3 text-sm font-extrabold capitalize',
+				'rounded-2xl border-2 px-3 py-3 text-sm font-black capitalize',
 				value === option
-					? 'border-white bg-white text-[#12072d]'
-					: 'border-transparent bg-[#1b1037] text-violet-100 hover:bg-[#25164a]'
+					? 'border-[var(--violet)] bg-[var(--violet)] text-white shadow-[0_5px_0_var(--accent-shadow)]'
+					: 'border-[var(--border)] bg-white text-[var(--text-muted)] hover:bg-[var(--surface-2)]'
 			]}
 			onclick={() => (value = option)}
 		>
@@ -24,3 +24,10 @@
 		</button>
 	{/each}
 </div>
+
+<style>
+	.segmented {
+		display: grid;
+		gap: 0.5rem;
+	}
+</style>

@@ -69,9 +69,10 @@
 		grid-template-columns: 2.5rem minmax(3rem, 1fr) 2.5rem;
 		align-items: center;
 		min-height: 2.85rem;
-		border: 2px solid transparent;
-		border-radius: var(--radius-sm);
-		background: #0d061f;
+		border: 2px solid var(--border);
+		border-radius: 1rem;
+		background: #ffffff;
+		box-shadow: 0 5px 0 #d8cfff;
 		overflow: hidden;
 	}
 	.stepper-button {
@@ -80,11 +81,11 @@
 		min-height: 2.85rem;
 		place-items: center;
 		background: var(--surface-2);
-		color: var(--text);
+		color: var(--violet);
 	}
 	.stepper-button:hover:not(:disabled) {
 		background: var(--surface-3);
-		color: var(--cyan);
+		color: var(--violet);
 	}
 	.stepper-button:disabled {
 		cursor: not-allowed;
@@ -94,7 +95,7 @@
 		text-align: center;
 		font-size: 1rem;
 		font-weight: 900;
-		color: white;
+		color: var(--text);
 		font-variant-numeric: tabular-nums;
 	}
 </style>

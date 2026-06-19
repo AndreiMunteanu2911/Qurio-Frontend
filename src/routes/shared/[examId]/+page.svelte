@@ -44,7 +44,7 @@
 
 <svelte:head><title>{exam?.title ?? 'Shared Exam'} — Qurio</title></svelte:head>
 
-<div style="display: flex; flex-direction: column; height: 100dvh; background: var(--exam-bg, var(--bg));">
+<div class="shared-exam-player exam-screen" style="display: flex; flex-direction: column; height: 100dvh;">
 	{#if loading}
 		<LoadingCard label="Loading exam..." />
 	{:else if !exam}
@@ -86,8 +86,8 @@
 		</div>
 	{:else}
 		<!-- Top bar -->
-		<div style="flex-shrink: 0; padding-block: 0.375rem 0.5rem;">
-			<div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.375rem;">
+		<div style="flex-shrink: 0; padding-block: 0.25rem 0.35rem;">
+			<div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.3rem;">
 				<p class="text-xs font-bold" style="color: var(--text-muted);">Question {index + 1}/{exam.questions.length}</p>
 				<span class="tag tag-cyan">{exam.difficulty}</span>
 			</div>
@@ -99,13 +99,13 @@
 		</div>
 
 		{#key index}
-			<div in:fly={{ x: 10, duration: 160 }} style="display: flex; flex-direction: column; flex: 1; gap: 0.625rem; min-height: 0;">
-				<ScrollbarContainer style="flex: 1; min-height: 0;">
-					<h2 class="text-xl font-black leading-snug text-white sm:text-2xl">{displayQ(current!.question)}</h2>
+			<div in:fly={{ x: 10, duration: 160 }} style="display: flex; flex-direction: column; flex: 1; gap: 0.5rem; min-height: 0;">
+				<ScrollbarContainer style="flex: 0 1 auto; max-height: clamp(5.5rem, 22dvh, 10.5rem); min-height: 3.5rem;">
+					<h2 class="text-lg font-black leading-snug sm:text-xl" style="color: var(--text);">{displayQ(current!.question)}</h2>
 				</ScrollbarContainer>
 
 				{#if selected !== null}
-					<div in:fly={{ y: 6, duration: 120 }} class="feedback {isCorrect ? 'correct' : 'incorrect'}" style="flex-shrink: 0;">
+					<div in:fly={{ y: 6, duration: 120 }} class="feedback {isCorrect ? 'correct' : 'incorrect'}" style="flex-shrink: 0; max-height: 22dvh; overflow: auto;">
 						<p class="text-sm font-black" style="color: {isCorrect ? 'var(--correct)' : 'var(--incorrect)'};">
 							{isCorrect ? 'Correct' : 'Incorrect'}
 						</p>
@@ -117,8 +117,8 @@
 					</div>
 				{/if}
 
-				<div style="margin-top: auto; flex-shrink: 0; padding-bottom: 1rem;">
-					<div style="display: grid; gap: 0.5rem; margin-bottom: 0.5rem;">
+				<div style="margin-top: auto; flex-shrink: 0; padding-bottom: 0.5rem;">
+					<div style="display: grid; gap: 0.45rem; margin-bottom: 0.45rem;">
 						{#each current!.options as option, optionIndex}
 							<button
 								class={[
@@ -147,3 +147,21 @@
 		{/key}
 	{/if}
 </div>
+
+<style>
+	.shared-exam-player :global(.option) {
+		padding: 0.68rem 0.75rem;
+		font-size: 0.86rem;
+	}
+	.shared-exam-player :global(.option .letter) {
+		width: 1.85rem;
+		height: 1.85rem;
+		border-radius: 0.7rem;
+	}
+	.shared-exam-player :global(.feedback) {
+		padding: 0.7rem 0.8rem;
+	}
+	.shared-exam-player :global(.progress-seg .seg) {
+		height: 0.45rem;
+	}
+</style>

@@ -140,7 +140,7 @@
 {#if loading}
 	<div style="padding: 1.125rem;"><LoadingCard label="Loading exam..." /></div>
 {:else if exam}
-	<div style="display: flex; flex-direction: column; height: 100dvh; background: var(--exam-bg, var(--bg));">
+	<div class="exam-screen" style="display: flex; flex-direction: column; height: 100dvh;">
 		<div style="display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding-block: 0.375rem 0.5rem;">
 			<Button variant="ghost" class="px-2 py-2 text-xs leading-none" onclick={() => (showExitModal = true)}>
 				<IconX size={16} stroke-width={2} />

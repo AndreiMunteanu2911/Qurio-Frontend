@@ -9,12 +9,12 @@
 			in:fly={{ x: 24, duration: 160 }}
 			out:fly={{ x: 24, duration: 140 }}
 			class={[
-				'rounded-lg border bg-[#130a2b] p-4 text-sm font-bold',
+				'rounded-2xl border-2 bg-white p-4 text-sm font-black shadow-[0_7px_0_#d8cfff,0_16px_28px_rgb(56_38_115_/_0.16)]',
 				toast.type === 'error'
-					? 'border-rose-300/35 text-rose-100'
+					? 'border-[#c6ace6] text-[#684996]'
 					: toast.type === 'success'
-						? 'border-cyan-300/35 text-cyan-100'
-						: 'border-violet-300/35 text-violet-100'
+						? 'border-[var(--accent-shadow)] text-[var(--accent)]'
+						: 'border-[var(--accent-shadow)] text-[var(--violet)]'
 			]}
 		>
 			{toast.message}

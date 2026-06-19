@@ -84,26 +84,26 @@
 
 	const BORDER_PREVIEW: Record<string, string> = {
 		border_thin_gold: '2px solid #ffc800',
-		border_glow_violet: '0 0 0 3px #6849ff, 0 0 22px rgb(104 73 255 / 0.75)',
-		border_double_ring: '0 0 0 2px #090318, 0 0 0 5px #6849ff, 0 0 0 8px #69eff7',
-		border_dashed_cyan: '2px dashed #69eff7',
-		border_starburst: '0 0 0 2px #090318, 0 0 0 5px #69eff7, 0 0 28px rgb(105 239 247 / 0.65)',
-		border_lime_pulse: '0 0 0 4px #b6ff2e, 0 0 24px rgb(182 255 46 / 0.65)',
-		border_inferno: '0 0 0 4px #ff3045, 0 0 26px rgb(255 138 0 / 0.7)',
+		border_glow_violet: '0 0 0 4px #6849ff, 0 0 18px rgb(104 73 255 / 0.45)',
+		border_double_ring: '0 0 0 3px #ffffff, 0 0 0 6px #6849ff, 0 0 0 9px #2f80ff',
+		border_dashed_cyan: '3px dashed #2f80ff',
+		border_starburst: '0 0 0 3px #ffffff, 0 0 0 6px #2f80ff, 0 0 24px rgb(47 128 255 / 0.45)',
+		border_lime_pulse: '0 0 0 4px #9be12a, 0 0 18px rgb(155 225 42 / 0.45)',
+		border_inferno: '0 0 0 4px #ff5a6b, 0 0 20px rgb(255 90 107 / 0.4)',
 		border_prism: '0 0 0 3px #ff3f8e, 0 0 0 6px #7dd3fc, 0 0 0 9px #b6ff2e',
-		border_ice_shard: '0 0 0 3px #dff7ff, 0 0 0 6px #2f80ff, 0 0 24px rgb(125 211 252 / 0.72)',
+		border_ice_shard: '0 0 0 3px #dff7ff, 0 0 0 6px #2f80ff, 0 0 20px rgb(47 128 255 / 0.42)',
 	};
 
 	const SKIN_PREVIEW: Record<string, { label: string; css: Record<string, string> }> = {
-		skin_minimal: { label: 'Minimal', css: { border: '1px solid rgb(255 255 255 / 0.18)', background: 'rgb(255 255 255 / 0.025)' } },
-		skin_gradient: { label: 'Gradient', css: { border: '1px solid rgb(255 255 255 / 0.12)', background: 'linear-gradient(135deg, rgb(104 73 255 / 0.32), rgb(105 239 247 / 0.14)), #130a2b', boxShadow: '0 10px 26px rgb(104 73 255 / 0.22)' } },
-		skin_neon: { label: 'Neon', css: { border: '1px solid rgb(105 239 247 / 0.28)', boxShadow: '0 0 22px rgb(104 73 255 / 0.36), 0 0 10px rgb(105 239 247 / 0.2)', background: '#100624' } },
-		skin_glass: { label: 'Glass', css: { background: 'linear-gradient(145deg, rgb(255 255 255 / 0.13), rgb(255 255 255 / 0.035))', backdropFilter: 'blur(18px)', border: '1px solid rgb(255 255 255 / 0.22)' } },
-		skin_classic: { label: 'Classic', css: { background: '#130a2b' } },
-		skin_terminal: { label: 'Terminal', css: { background: '#030b08', border: '1px solid rgb(86 255 146 / 0.28)', boxShadow: 'inset 4px 0 0 #56ff92, 0 0 18px rgb(86 255 146 / 0.12)' } },
-		skin_hologram: { label: 'Hologram', css: { background: 'linear-gradient(120deg, rgb(125 211 252 / 0.2), rgb(217 70 239 / 0.18), rgb(182 255 46 / 0.1)), #100624', border: '1px solid rgb(255 255 255 / 0.24)', boxShadow: '0 0 24px rgb(125 211 252 / 0.16)' } },
-		skin_paper: { label: 'Paper', css: { background: 'linear-gradient(145deg, #3a2818, #20130c)', border: '1px solid #c8ad7f', boxShadow: '0 8px 18px rgb(0 0 0 / 0.22)' } },
-		skin_obsidian: { label: 'Obsidian', css: { background: 'linear-gradient(145deg, #080506, #160709 55%, #050101)', border: '1px solid rgb(255 48 69 / 0.35)', boxShadow: '0 0 26px rgb(255 48 69 / 0.16)' } },
+		skin_minimal: { label: 'Minimal', css: { border: '2px solid #cfc5ed', background: '#ffffff', boxShadow: '0 6px 0 #e5ddfa' } },
+		skin_gradient: { label: 'Gradient', css: { border: '2px solid #9f86ff', background: 'linear-gradient(135deg, #ffffff, #eee8ff 52%, #e6f2ff)', boxShadow: '0 7px 0 #b8a9ff' } },
+		skin_neon: { label: 'Neon', css: { border: '2px solid #2f80ff', background: 'linear-gradient(145deg, #ffffff, #e8f2ff)', boxShadow: '0 7px 0 #9cc7ff, 0 0 20px rgb(47 128 255 / 0.28)' } },
+		skin_glass: { label: 'Glass', css: { background: 'rgb(255 255 255 / 0.7)', backdropFilter: 'blur(16px)', border: '2px solid rgb(255 255 255 / 0.95)', boxShadow: '0 7px 0 rgb(216 207 255 / 0.72)' } },
+		skin_classic: { label: 'Classic', css: { border: '2px solid #d7caff', background: '#ffffff', boxShadow: '0 7px 0 #d8cfff' } },
+		skin_terminal: { label: 'Terminal', css: { background: 'linear-gradient(145deg, #fbffff, #e8fff5)', border: '2px solid #55d99c', boxShadow: '0 7px 0 #9de6c5' } },
+		skin_hologram: { label: 'Hologram', css: { background: 'linear-gradient(135deg, #ffffff, #efe8ff 35%, #e6f4ff 70%, #fff7cf)', border: '2px solid #9f86ff', boxShadow: '0 7px 0 #d8cfff, 0 0 20px rgb(125 211 252 / 0.22)' } },
+		skin_paper: { label: 'Paper', css: { background: 'linear-gradient(145deg, #fffdf7, #f3edff)', border: '2px solid #c5afea', boxShadow: '0 7px 0 #ded2ff' } },
+		skin_obsidian: { label: 'Obsidian', css: { background: 'linear-gradient(145deg, #ffffff, #f2efff)', border: '2px solid #6849ff', boxShadow: '0 7px 0 #7f65ec' } },
 	};
 
 	const accentPreview = $derived(selectedItem && selectedItem.type === 'accent' && ACCENT_COLORS[selectedItem.id] ? ACCENT_COLORS[selectedItem.id] : null);
@@ -140,6 +140,7 @@
 		try {
 			const result = await equipCosmetic(itemId, slot);
 			inventory = { ...inventory!, activeCosmetics: result.activeCosmetics };
+			badgeRefresh.update(n => n + 1);
 			pushToast('Item equipped!', 'success');
 		} catch (error) {
 			pushToast(error instanceof Error ? error.message : 'Failed to equip.', 'error');
@@ -150,6 +151,7 @@
 		try {
 			const result = await equipCosmetic(null, slot);
 			inventory = { ...inventory!, activeCosmetics: result.activeCosmetics };
+			badgeRefresh.update(n => n + 1);
 		} catch { /* ok */ }
 	}
 
@@ -284,15 +286,15 @@
 
 				{:else if isTitle}
 					<div class="flex flex-col items-center gap-2 text-center">
-						<div class="flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-2xl font-black text-white">U</div>
+						<div class="flex h-14 w-14 items-center justify-center rounded-full border-2 text-2xl font-black" style="background: var(--surface-2); border-color: var(--border); color: var(--text);">U</div>
 						<p class="text-sm font-bold" style="color: var(--accent);">{item.name.replace('Title: ', '')}</p>
-						<p class="text-sm text-white/80">Username</p>
+						<p class="text-sm" style="color: var(--text-muted);">Username</p>
 					</div>
 
 				{:else if borderPreview}
 					<div class="flex flex-col items-center gap-3">
-						<div class="flex h-20 w-20 items-center justify-center rounded-full bg-white/10 text-3xl font-black text-white"
-							style="box-shadow: {borderPreview};">
+						<div class="flex h-20 w-20 items-center justify-center rounded-full border-2 text-3xl font-black"
+							style="background: var(--surface-2); border-color: var(--border); color: var(--text); box-shadow: {borderPreview};">
 							U
 						</div>
 					</div>
@@ -301,7 +303,7 @@
 					{@const skinCss = Object.entries(skinPreview.css).map(([k, v]) => `${k}:${v}`).join(';')}
 					<div class="w-full max-w-xs">
 						<div class="rounded-xl p-4 text-center" style={skinCss}>
-							<p class="text-sm font-black text-white">{skinPreview.label} card</p>
+							<p class="text-sm font-black" style="color: var(--text);">{skinPreview.label} card</p>
 							<p class="mt-1 text-xs" style="color: var(--text-muted);">Preview of how cards will look.</p>
 						</div>
 					</div>
@@ -330,7 +332,7 @@
 			</div>
 		</div>
 
-		{#snippet footer()}
+		<div class="mt-5 flex flex-col gap-2 sm:flex-row">
 			<Button variant="ghost" class="flex-1" onclick={closeModal}>Close</Button>
 			{#if !owned}
 				<Button class="flex-1" disabled={purchasing === item.id || !canAfford} onclick={() => modalAction()}>
@@ -344,6 +346,6 @@
 			{:else}
 				<Button class="flex-1" variant="secondary" onclick={closeModal}>Owned</Button>
 			{/if}
-		{/snippet}
+		</div>
 	{/if}
 </ModalWrapper>

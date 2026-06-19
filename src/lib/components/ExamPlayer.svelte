@@ -36,13 +36,13 @@
 		onRestart?: () => void;
 	}>();
 
-	let index = $state(initialIndex);
+	let index = $state.by(() => initialIndex);
 	let selected = $state<number | null>(null);
-	let score = $state(initialScore);
+	let score = $state.by(() => initialScore);
 	let completed = $state(false);
-	let timeLeft = $state((exam.settings?.timeLimitMinutes ?? 10) * 60);
+	let timeLeft = $state.by(() => (exam.settings?.timeLimitMinutes ?? 10) * 60);
 	let timerActive = $state(true);
-	let answers = $state<{ questionId: string; selected: number; correct: boolean }[]>([...initialAnswers]);
+	let answers = $state.by<{ questionId: string; selected: number; correct: boolean }[]>(() => [...initialAnswers]);
 	let newMistakes = $state<{ question: Question }[]>([]);
 	let powerUpsUsed = $state<string[]>([]);
 	let revealedOptions = $state<Set<number>>(new Set());
@@ -234,10 +234,10 @@
 	</div>
 
 {:else}
-	<div style="display: flex; flex-direction: column; height: 100%; gap: 0;">
+	<div class="exam-player" style="display: flex; flex-direction: column; height: 100%; gap: 0;">
 		<!-- Progress + meta -->
-		<div style="margin-bottom: 0.5rem; flex-shrink: 0;">
-			<div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.375rem;">
+		<div style="margin-bottom: 0.35rem; flex-shrink: 0;">
+			<div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.3rem;">
 				<div style="display: flex; align-items: center; gap: 0.375rem;">
 					<span class="text-xs font-bold" style="color: var(--text-muted);">{currentIndex + 1}/{exam.questions.length}</span>
 				</div>
@@ -259,7 +259,7 @@
 						><IconArrowRight size={13} stroke-width={2} /></button>
 					{/if}
 					<span class="tag tag-cyan">{exam.difficulty}</span>
-					<svg width="40" height="40" viewBox="0 0 48 48" style="display: block; flex-shrink: 0;">
+					<svg width="34" height="34" viewBox="0 0 48 48" style="display: block; flex-shrink: 0;">
 						<circle cx="24" cy="24" r="20" fill="none" stroke="rgb(255 255 255 / 0.08)" stroke-width="3.5"/>
 						<circle
 							cx="24"
@@ -295,10 +295,10 @@
 		</div>
 
 		{#key currentIndex + (secondChanceActive ? '_sc' : '')}
-			<div in:fly={{ x: 10, duration: 160 }} style="display: flex; flex-direction: column; flex: 1; gap: 0.625rem; min-height: 0;">
+			<div in:fly={{ x: 10, duration: 160 }} style="display: flex; flex-direction: column; flex: 1; gap: 0.5rem; min-height: 0;">
 				<!-- Question (scrollable if long) -->
-				<ScrollbarContainer style="flex: 1; min-height: 0;">
-					<h2 class="text-xl font-black leading-snug text-white sm:text-2xl">
+				<ScrollbarContainer style="flex: 0 1 auto; max-height: clamp(5.5rem, 22dvh, 10.5rem); min-height: 3.5rem;">
+					<h2 class="text-lg font-black leading-snug sm:text-xl" style="color: var(--text);">
 						{displayQ(current.question)}
 					</h2>
 					{#if secondChanceActive}
@@ -308,7 +308,7 @@
 
 				<!-- Explanation (in the middle after answering) -->
 				{#if selected !== null}
-					<div in:fly={{ y: 6, duration: 120 }} class="feedback {isCorrect ? 'correct' : 'incorrect'}" style="flex-shrink: 0;">
+					<div in:fly={{ y: 6, duration: 120 }} class="feedback {isCorrect ? 'correct' : 'incorrect'}" style="flex-shrink: 0; max-height: 22dvh; overflow: auto;">
 						<p class="text-sm font-black" style="color: {isCorrect ? 'var(--correct)' : 'var(--incorrect)'};">
 							{isCorrect ? 'Correct' : 'Incorrect'}
 						</p>
@@ -321,8 +321,8 @@
 				{/if}
 
 				<!-- Options + button (pushed to bottom, with reserved button space) -->
-				<div style="margin-top: auto; flex-shrink: 0; padding-bottom: 1rem;">
-					<div style="display: grid; gap: 0.5rem; margin-bottom: 0.5rem;">
+				<div style="margin-top: auto; flex-shrink: 0; padding-bottom: 0.5rem;">
+					<div style="display: grid; gap: 0.45rem; margin-bottom: 0.45rem;">
 						{#each current.options as option, optionIndex}
 							<button
 								class={[
@@ -363,3 +363,21 @@
 		{/key}
 	</div>
 {/if}
+
+<style>
+	.exam-player :global(.option) {
+		padding: 0.68rem 0.75rem;
+		font-size: 0.86rem;
+	}
+	.exam-player :global(.option .letter) {
+		width: 1.85rem;
+		height: 1.85rem;
+		border-radius: 0.7rem;
+	}
+	.exam-player :global(.feedback) {
+		padding: 0.7rem 0.8rem;
+	}
+	.exam-player :global(.progress-seg .seg) {
+		height: 0.45rem;
+	}
+</style>

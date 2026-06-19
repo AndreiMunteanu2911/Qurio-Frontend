@@ -6,6 +6,7 @@
 	import Button from '$lib/components/Button.svelte';
 	import { getInventory, equipCosmetic } from '$lib/api';
 	import { SHOP_ITEMS } from '$lib/shop';
+	import { badgeRefresh } from '$lib/refresh';
 	import { pushToast } from '$lib/toasts';
 	import { IconArrowLeft, IconCheck } from '@tabler/icons-svelte';
 	import type { InventoryData } from '$lib/types';
@@ -62,26 +63,26 @@
 
 	const BORDER_PREVIEW: Record<string, string> = {
 		border_thin_gold: '2px solid #ffc800',
-		border_glow_violet: '0 0 0 3px #6849ff, 0 0 22px rgb(104 73 255 / 0.75)',
-		border_double_ring: '0 0 0 2px #090318, 0 0 0 5px #6849ff, 0 0 0 8px #69eff7',
-		border_dashed_cyan: '2px dashed #69eff7',
-		border_starburst: '0 0 0 2px #090318, 0 0 0 5px #69eff7, 0 0 28px rgb(105 239 247 / 0.65)',
-		border_lime_pulse: '0 0 0 4px #b6ff2e, 0 0 24px rgb(182 255 46 / 0.65)',
-		border_inferno: '0 0 0 4px #ff3045, 0 0 26px rgb(255 138 0 / 0.7)',
+		border_glow_violet: '0 0 0 4px #6849ff, 0 0 18px rgb(104 73 255 / 0.45)',
+		border_double_ring: '0 0 0 3px #ffffff, 0 0 0 6px #6849ff, 0 0 0 9px #2f80ff',
+		border_dashed_cyan: '3px dashed #2f80ff',
+		border_starburst: '0 0 0 3px #ffffff, 0 0 0 6px #2f80ff, 0 0 24px rgb(47 128 255 / 0.45)',
+		border_lime_pulse: '0 0 0 4px #9be12a, 0 0 18px rgb(155 225 42 / 0.45)',
+		border_inferno: '0 0 0 4px #ff5a6b, 0 0 20px rgb(255 90 107 / 0.4)',
 		border_prism: '0 0 0 3px #ff3f8e, 0 0 0 6px #7dd3fc, 0 0 0 9px #b6ff2e',
-		border_ice_shard: '0 0 0 3px #dff7ff, 0 0 0 6px #2f80ff, 0 0 24px rgb(125 211 252 / 0.72)',
+		border_ice_shard: '0 0 0 3px #dff7ff, 0 0 0 6px #2f80ff, 0 0 20px rgb(47 128 255 / 0.42)',
 	};
 
 	const SKIN_PREVIEW: Record<string, Record<string, string>> = {
-		skin_minimal: { border: '1px solid rgb(255 255 255 / 0.18)', background: 'rgb(255 255 255 / 0.025)' },
-		skin_gradient: { border: '1px solid rgb(255 255 255 / 0.12)', background: 'linear-gradient(135deg, rgb(104 73 255 / 0.32), rgb(105 239 247 / 0.14)), #130a2b', boxShadow: '0 10px 26px rgb(104 73 255 / 0.22)' },
-		skin_neon: { border: '1px solid rgb(105 239 247 / 0.28)', boxShadow: '0 0 22px rgb(104 73 255 / 0.36), 0 0 10px rgb(105 239 247 / 0.2)', background: '#100624' },
-		skin_glass: { background: 'linear-gradient(145deg, rgb(255 255 255 / 0.13), rgb(255 255 255 / 0.035))', backdropFilter: 'blur(18px)', border: '1px solid rgb(255 255 255 / 0.22)' },
-		skin_classic: { background: '#130a2b' },
-		skin_terminal: { background: '#030b08', border: '1px solid rgb(86 255 146 / 0.28)', boxShadow: 'inset 4px 0 0 #56ff92, 0 0 18px rgb(86 255 146 / 0.12)' },
-		skin_hologram: { background: 'linear-gradient(120deg, rgb(125 211 252 / 0.2), rgb(217 70 239 / 0.18), rgb(182 255 46 / 0.1)), #100624', border: '1px solid rgb(255 255 255 / 0.24)', boxShadow: '0 0 24px rgb(125 211 252 / 0.16)' },
-		skin_paper: { background: 'linear-gradient(145deg, #3a2818, #20130c)', border: '1px solid #c8ad7f', boxShadow: '0 8px 18px rgb(0 0 0 / 0.22)' },
-		skin_obsidian: { background: 'linear-gradient(145deg, #080506, #160709 55%, #050101)', border: '1px solid rgb(255 48 69 / 0.35)', boxShadow: '0 0 26px rgb(255 48 69 / 0.16)' },
+		skin_minimal: { border: '2px solid #cfc5ed', background: '#ffffff', boxShadow: '0 6px 0 #e5ddfa' },
+		skin_gradient: { border: '2px solid #9f86ff', background: 'linear-gradient(135deg, #ffffff, #eee8ff 52%, #e6f2ff)', boxShadow: '0 7px 0 #b8a9ff' },
+		skin_neon: { border: '2px solid #2f80ff', background: 'linear-gradient(145deg, #ffffff, #e8f2ff)', boxShadow: '0 7px 0 #9cc7ff, 0 0 20px rgb(47 128 255 / 0.28)' },
+		skin_glass: { background: 'rgb(255 255 255 / 0.7)', backdropFilter: 'blur(16px)', border: '2px solid rgb(255 255 255 / 0.95)', boxShadow: '0 7px 0 rgb(216 207 255 / 0.72)' },
+		skin_classic: { border: '2px solid #d7caff', background: '#ffffff', boxShadow: '0 7px 0 #d8cfff' },
+		skin_terminal: { background: 'linear-gradient(145deg, #fbffff, #e8fff5)', border: '2px solid #55d99c', boxShadow: '0 7px 0 #9de6c5' },
+		skin_hologram: { background: 'linear-gradient(135deg, #ffffff, #efe8ff 35%, #e6f4ff 70%, #fff7cf)', border: '2px solid #9f86ff', boxShadow: '0 7px 0 #d8cfff, 0 0 20px rgb(125 211 252 / 0.22)' },
+		skin_paper: { background: 'linear-gradient(145deg, #fffdf7, #f3edff)', border: '2px solid #c5afea', boxShadow: '0 7px 0 #ded2ff' },
+		skin_obsidian: { background: 'linear-gradient(145deg, #ffffff, #f2efff)', border: '2px solid #6849ff', boxShadow: '0 7px 0 #7f65ec' },
 	};
 
 	onMount(async () => {
@@ -95,6 +96,7 @@
 		try {
 			const result = await equipCosmetic(itemId, slot);
 			inventory = { ...inventory!, activeCosmetics: result.activeCosmetics };
+			badgeRefresh.update(n => n + 1);
 			pushToast('Equipped!', 'success');
 		} catch (error) {
 			pushToast(error instanceof Error ? error.message : 'Failed to equip.', 'error');
@@ -105,6 +107,7 @@
 		try {
 			const result = await equipCosmetic(null, slot);
 			inventory = { ...inventory!, activeCosmetics: result.activeCosmetics };
+			badgeRefresh.update(n => n + 1);
 		} catch { /* ok */ }
 	}
 </script>
@@ -197,14 +200,14 @@
 								{#if accentData}
 									<div class="h-10 w-10 rounded-full" style="background: {accentData.color}; box-shadow: 0 0 16px {accentData.color}40;"></div>
 								{:else if borderData}
-									<div class="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-lg font-black text-white"
-										style="box-shadow: {borderData};">
+									<div class="flex h-12 w-12 items-center justify-center rounded-full border-2 text-lg font-black"
+										style="background: var(--surface-2); border-color: var(--border); color: var(--text); box-shadow: {borderData};">
 										U
 									</div>
 								{:else if skinData}
 									{@const skinCss = Object.entries(skinData).map(([k, v]) => `${k}:${v}`).join(';')}
 								<div class="w-full max-w-[10rem] rounded-lg p-3 text-center" style={skinCss}>
-										<p class="text-xs font-bold text-white">Card preview</p>
+										<p class="text-xs font-bold" style="color: var(--text);">Card preview</p>
 									</div>
 								{:else if themeData}
 									<div class="w-full max-w-[10rem] rounded-lg p-3 text-center" style="background: {themeData};">

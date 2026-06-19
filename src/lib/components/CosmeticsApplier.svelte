@@ -5,16 +5,16 @@
 
 	let activeCosmetics = $state<Record<string, string>>({});
 
-	const ACCENT_COLORS: Record<string, { accent: string; accentSoft: string }> = {
-		accent_gold: { accent: '#ffd23f', accentSoft: 'rgb(255 210 63 / 0.18)' },
-		accent_rose: { accent: '#ff3f8e', accentSoft: 'rgb(255 63 142 / 0.18)' },
-		accent_emerald: { accent: '#12e08a', accentSoft: 'rgb(18 224 138 / 0.18)' },
-		accent_sapphire: { accent: '#2f80ff', accentSoft: 'rgb(47 128 255 / 0.18)' },
-		accent_amber: { accent: '#ff8a00', accentSoft: 'rgb(255 138 0 / 0.18)' },
-		accent_crimson: { accent: '#ff3045', accentSoft: 'rgb(255 48 69 / 0.2)' },
-		accent_lime: { accent: '#b6ff2e', accentSoft: 'rgb(182 255 46 / 0.18)' },
-		accent_orchid: { accent: '#d946ef', accentSoft: 'rgb(217 70 239 / 0.2)' },
-		accent_ice: { accent: '#7dd3fc', accentSoft: 'rgb(125 211 252 / 0.2)' },
+	const ACCENT_COLORS: Record<string, { accent: string; accentSoft: string; accentShadow: string }> = {
+		accent_gold: { accent: '#d99a00', accentSoft: '#fff2bf', accentShadow: '#e7c95a' },
+		accent_rose: { accent: '#ff3f8e', accentSoft: '#ffe1ef', accentShadow: '#eba4c5' },
+		accent_emerald: { accent: '#0ea66b', accentSoft: '#dff9ed', accentShadow: '#9ddfbd' },
+		accent_sapphire: { accent: '#2f80ff', accentSoft: '#e7f1ff', accentShadow: '#9cc7ff' },
+		accent_amber: { accent: '#e87800', accentSoft: '#fff0d6', accentShadow: '#e8bd72' },
+		accent_crimson: { accent: '#e7354a', accentSoft: '#ffe2e6', accentShadow: '#eca0aa' },
+		accent_lime: { accent: '#78a800', accentSoft: '#eef8cb', accentShadow: '#c5df78' },
+		accent_orchid: { accent: '#b43ad8', accentSoft: '#f6e1ff', accentShadow: '#d9a3ea' },
+		accent_ice: { accent: '#1e9bd7', accentSoft: '#ddf4ff', accentShadow: '#9ad9f3' },
 	};
 
 	const THEME_BGS: Record<string, string> = {
@@ -44,9 +44,10 @@
 	async function loadInventory() {
 		try {
 			const inv = await getInventory();
-			activeCosmetics = inv.activeCosmetics ?? {};
+			const next = inv.activeCosmetics ?? {};
+			activeCosmetics = next;
+			applyCosmetics(next);
 		} catch { /* ok */ }
-		applyCosmetics();
 	}
 
 	let unsub = () => {};
@@ -56,27 +57,39 @@
 	});
 	onDestroy(() => unsub());
 
-	function applyCosmetics() {
+	function applyCosmetics(cosmetics = activeCosmetics) {
 		const root = document.documentElement;
 		root.removeAttribute('data-exam-theme');
 		root.classList.remove(...Object.values(SKIN_CLASSES));
 
-		const accentId = activeCosmetics['accent'];
+		const accentId = cosmetics['accent'];
 		if (accentId && ACCENT_COLORS[accentId]) {
-			const { accent, accentSoft } = ACCENT_COLORS[accentId];
+			const { accent, accentSoft, accentShadow } = ACCENT_COLORS[accentId];
 			root.style.setProperty('--accent', accent);
 			root.style.setProperty('--accent-soft', accentSoft);
+			root.style.setProperty('--violet', accent);
+			root.style.setProperty('--violet-soft', accentSoft);
+			root.style.setProperty('--cyan', accent);
+			root.style.setProperty('--cyan-soft', accentSoft);
+			root.style.setProperty('--border-strong', accent);
+			root.style.setProperty('--accent-shadow', accentShadow);
 		} else {
-			root.style.setProperty('--accent', '#69eff7');
-			root.style.setProperty('--accent-soft', 'rgb(105 239 247 / 0.1)');
+			root.style.setProperty('--accent', '#6849ff');
+			root.style.setProperty('--accent-soft', '#ebe6ff');
+			root.style.setProperty('--violet', '#6849ff');
+			root.style.setProperty('--violet-soft', '#ebe6ff');
+			root.style.setProperty('--cyan', '#2f80ff');
+			root.style.setProperty('--cyan-soft', '#e7f1ff');
+			root.style.setProperty('--border-strong', '#9f86ff');
+			root.style.setProperty('--accent-shadow', '#b8a9ff');
 		}
 
-		const themeId = activeCosmetics['examTheme'];
+		const themeId = cosmetics['examTheme'];
 		if (themeId && THEME_BGS[themeId]) {
 			root.dataset.examTheme = themeId;
 		}
 
-		const skinId = activeCosmetics['cardSkin'];
+		const skinId = cosmetics['cardSkin'];
 		if (skinId && SKIN_CLASSES[skinId]) {
 			root.classList.add(SKIN_CLASSES[skinId]);
 		}

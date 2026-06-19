@@ -31,13 +31,15 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.3rem;
-		padding: 0.35rem 0.6rem;
+		padding: 0.42rem 0.65rem;
 		border-radius: 999px;
-		background: rgb(255 200 0 / 0.1);
-		color: #ffc800;
+		border: 2px solid #ffe27a;
+		background: var(--coin-soft);
+		color: #8b6500;
 		font-size: 0.75rem;
-		font-weight: 850;
+		font-weight: 950;
 		line-height: 1;
+		box-shadow: 0 5px 0 #ecd160;
 	}
 	.balance {
 		min-width: 1.2rem;

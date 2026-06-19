@@ -4,7 +4,7 @@
 
 <div class="soft-card text-center">
 	<div
-		class="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-white/15 border-t-cyan-200"
+		class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-[var(--border)] border-t-[var(--accent)]"
 	></div>
-	<p class="font-semibold text-violet-100">{label}</p>
+	<p class="font-black" style="color: var(--text-muted);">{label}</p>
 </div>

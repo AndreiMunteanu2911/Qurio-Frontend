@@ -84,9 +84,10 @@
 		left: 0;
 		right: 0;
 		z-index: 50;
-		border-radius: var(--radius-sm);
+		border-radius: 1rem;
 		background: var(--surface);
-		border: 1px solid var(--border);
+		border: 2px solid var(--border);
+		box-shadow: 0 8px 0 #d8cfff, 0 18px 28px rgb(56 38 115 / 0.16);
 		overflow: hidden;
 	}
 	.select-option {
@@ -94,8 +95,8 @@
 		text-align: left;
 		padding: 0.65rem 0.9rem;
 		font-size: 0.875rem;
-		font-weight: 650;
-		color: white;
+		font-weight: 850;
+		color: var(--text);
 		background: transparent;
 		border: none;
 		cursor: pointer;

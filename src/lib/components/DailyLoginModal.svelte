@@ -21,6 +21,7 @@
 	role="dialog"
 	aria-modal="true"
 	aria-label="Daily login bonus"
+	tabindex="-1"
 	onclick={onClose}
 	onkeydown={(e) => e.key === 'Escape' && onClose()}
 >
@@ -28,7 +29,9 @@
 		in:fly={{ y: 20, duration: 200 }}
 		class="card text-center"
 		style="max-width: 22rem; width: 100%;"
+		role="document"
 		onclick={(e) => e.stopPropagation()}
+		onkeydown={(e) => e.stopPropagation()}
 	>
 		<div class="flex justify-center">
 			<div class="flex h-14 w-14 items-center justify-center rounded-full" style="background: rgb(255 200 0 / 0.12);">
