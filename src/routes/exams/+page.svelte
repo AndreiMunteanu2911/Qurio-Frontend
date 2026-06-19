@@ -108,7 +108,7 @@
 										{new Date(exam.createdAt).toLocaleDateString()} — 10 questions
 										{#if best}<span style="color: var(--cyan);"> · Best: {best.score}/{best.total}</span>{/if}
 										{#if inProgress.has(exam.id)}<span class="tag tag-cyan" style="font-size: 0.6rem;">Resume</span>{/if}
-										<span class="tag tag-surface" style="font-size: 0.6rem;">{exam.category}</span>
+										<span class="tag tag-violet" style="font-size: 0.6rem;">{exam.category}</span>
 									</p>
 								</a>
 								<div class="flex gap-2">

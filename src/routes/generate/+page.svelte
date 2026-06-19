@@ -148,9 +148,9 @@
 					placeholder="Paste notes, a syllabus section, a concept summary, or a topic..."
 				></textarea>
 			</label>
-			<div class="flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs font-black" style="background: var(--surface-2); color: var(--text-muted);">
+			<div class="theme-card-button character-counter flex flex-wrap items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs font-black">
 				<p>{promptLength}/8000 characters</p>
-				<p>{promptLength < 20 ? 'Need 20+' : 'Ready'}</p>
+				<p class:ready={promptLength >= 20}>{promptLength < 20 ? 'Need 20+' : 'Ready'}</p>
 			</div>
 			<div class="grid gap-2 sm:grid-cols-2">
 				<Button disabled={!canGenerate} onclick={quickExam}>
@@ -227,6 +227,13 @@
 	}
 	.settings-grid.three {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+	.character-counter {
+		color: var(--text-muted);
+		box-shadow: 0 4px 0 #070216;
+	}
+	.character-counter .ready {
+		color: var(--accent);
 	}
 	@media (max-width: 640px) {
 		.settings-grid,

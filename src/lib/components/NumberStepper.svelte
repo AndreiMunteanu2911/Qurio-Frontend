@@ -71,8 +71,8 @@
 		min-height: 2.85rem;
 		border: 2px solid var(--border);
 		border-radius: 1rem;
-		background: #ffffff;
-		box-shadow: 0 5px 0 #d8cfff;
+		background: var(--surface);
+		box-shadow: 0 5px 0 #070216;
 		overflow: hidden;
 	}
 	.stepper-button {

@@ -32,7 +32,7 @@
 		onclick={onClose}
 	>
 		<div
-			class="game-modal w-full max-w-md rounded-[1.5rem] border-2 border-[var(--border)] bg-white p-5 shadow-[0_10px_0_#d8cfff,0_22px_44px_rgb(56_38_115_/_0.2)]"
+			class="game-modal w-full max-w-md rounded-[1.5rem] border-2 border-[var(--border)] bg-[var(--surface)] p-5 shadow-[0_10px_0_#070216,0_22px_44px_rgb(0_0_0_/_0.32)]"
 			transition:scale={{ start: 0.94, duration: 140 }}
 			role="dialog"
 			aria-modal="true"
@@ -49,7 +49,7 @@
 					{/if}
 				</div>
 				<button
-					class="grid h-8 w-8 shrink-0 place-items-center rounded-xl border-2 font-black shadow-[0_4px_0_#d8cfff]"
+					class="grid h-8 w-8 shrink-0 place-items-center rounded-xl border-2 font-black shadow-[0_4px_0_#070216]"
 					style="background: var(--surface-2); border-color: var(--border); color: var(--violet);"
 					type="button"
 					aria-label="Close"
@@ -75,7 +75,5 @@
 {/if}
 
 <style>
-	:global(.game-modal .text-white) {
-		color: var(--text) !important;
-	}
+	:global(.game-modal .text-white) { color: var(--text) !important; }
 </style>

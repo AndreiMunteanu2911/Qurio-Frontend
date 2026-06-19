@@ -29,11 +29,11 @@
 		padding: 0.42rem 0.6rem;
 		border: 2px solid var(--border);
 		border-radius: 999px;
-		background: #ffffff;
+		background: var(--surface);
 		opacity: 0.65;
 		line-height: 1;
 		color: var(--text-muted);
-		box-shadow: 0 5px 0 #d8cfff;
+		box-shadow: 0 5px 0 #070216;
 	}
 	.streak-badge.active {
 		opacity: 1;

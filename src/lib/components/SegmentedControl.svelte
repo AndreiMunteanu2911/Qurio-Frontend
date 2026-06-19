@@ -13,10 +13,10 @@
 		<button
 			type="button"
 			class={[
-				'rounded-2xl border-2 px-3 py-3 text-sm font-black capitalize',
+				'theme-card-button rounded-2xl border-2 px-3 py-3 text-sm font-black capitalize',
 				value === option
-					? 'border-[var(--violet)] bg-[var(--violet)] text-white shadow-[0_5px_0_var(--accent-shadow)]'
-					: 'border-[var(--border)] bg-white text-[var(--text-muted)] hover:bg-[var(--surface-2)]'
+					? 'is-active border-[var(--accent)] bg-[var(--accent-soft)] text-[var(--accent)] shadow-[0_5px_0_var(--accent-shadow)]'
+					: 'border-[var(--border)] bg-[var(--surface-2)] text-[var(--text-muted)] hover:border-[var(--border-strong)] hover:bg-[var(--accent-soft)] hover:text-[var(--accent)]'
 			]}
 			onclick={() => (value = option)}
 		>

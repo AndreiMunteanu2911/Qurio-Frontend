@@ -53,11 +53,11 @@
 	);
 	const activeBorder = $derived(inventory?.activeCosmetics?.['avatarBorder'] ?? null);
 	const BORDER_CSS: Record<string, string> = {
-		border_thin_gold: '2px solid #ffc800',
+		border_thin_gold: '0 0 0 2px #ffd23f, 0 0 14px rgb(255 210 63 / 0.45)',
 		border_glow_violet: '0 0 0 4px #6849ff, 0 0 18px rgb(104 73 255 / 0.45)',
 		border_double_ring: '0 0 0 3px #ffffff, 0 0 0 6px var(--violet), 0 0 0 9px var(--cyan)',
 		border_dashed_cyan: '3px dashed var(--cyan)',
-		border_starburst: '0 0 0 3px #ffffff, 0 0 0 6px var(--cyan), 0 0 24px rgb(47 128 255 / 0.45)',
+		border_starburst: '0 0 0 3px #ffd23f, 0 0 0 6px var(--violet), 0 0 24px rgb(255 210 63 / 0.38), 0 0 34px rgb(104 73 255 / 0.36)',
 		border_lime_pulse: '0 0 0 4px #9be12a, 0 0 18px rgb(155 225 42 / 0.45)',
 		border_inferno: '0 0 0 4px #ff5a6b, 0 0 20px rgb(255 90 107 / 0.4)',
 		border_prism: '0 0 0 3px #ff3f8e, 0 0 0 6px #7dd3fc, 0 0 0 9px #b6ff2e',
@@ -91,7 +91,7 @@
 						background: var(--surface-3); display: flex; align-items: center; justify-content: center;
 						font-size: 1.5rem; font-weight: 900; color: white;
 						box-shadow: {activeBorder ? (BORDER_CSS[activeBorder] ?? 'none') : 'none'};
-						border: {activeBorder?.startsWith('border_thin') ? '2px solid #ffc800' : 'none'};"
+						border: none;"
 				>
 					{($user?.displayName || 'L')[0].toUpperCase()}
 				</div>
@@ -132,7 +132,7 @@
 			</div>
 		{/if}
 
-		<div class="card-grid card-grid-2">
+		<div class="card-grid card-grid-2 profile-actions">
 			<Button variant="secondary" class="w-full" onclick={() => { displayName = $user?.displayName || ''; showEditName = true; }}>
 				<IconEdit size={14} stroke-width={2} /> Edit display name
 			</Button>

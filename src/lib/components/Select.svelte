@@ -87,7 +87,7 @@
 		border-radius: 1rem;
 		background: var(--surface);
 		border: 2px solid var(--border);
-		box-shadow: 0 8px 0 #d8cfff, 0 18px 28px rgb(56 38 115 / 0.16);
+		box-shadow: 0 8px 0 #070216, 0 18px 28px rgb(0 0 0 / 0.26);
 		overflow: hidden;
 	}
 	.select-option {
@@ -103,6 +103,7 @@
 	}
 	.select-option:hover,
 	.select-option.selected {
-		background: var(--surface-2);
+		background: var(--accent-soft);
+		color: var(--accent);
 	}
 </style>
