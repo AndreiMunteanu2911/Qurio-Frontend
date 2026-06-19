@@ -5,6 +5,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 const isCapacitorBuild = process.env.CAPACITOR_BUILD === 'true';
+const isVercelBuild = process.env.VERCEL === '1' || process.env.VERCEL === 'true';
 
 export default defineConfig({
 	plugins: [
@@ -15,15 +16,15 @@ export default defineConfig({
 				runes: ({ filename }) =>
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			adapter: isCapacitorBuild
-				? staticAdapter({
+			adapter: isVercelBuild && !isCapacitorBuild
+				? vercelAdapter()
+				: staticAdapter({
 					pages: 'build',
 					assets: 'build',
 					fallback: 'index.html',
 					precompress: false,
 					strict: false
 				})
-				: vercelAdapter()
 		})
 	]
 });

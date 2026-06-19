@@ -36,13 +36,13 @@
 		onRestart?: () => void;
 	}>();
 
-	let index = $state.by(() => initialIndex);
+	let index = $state(initialIndex);
 	let selected = $state<number | null>(null);
-	let score = $state.by(() => initialScore);
+	let score = $state(initialScore);
 	let completed = $state(false);
-	let timeLeft = $state.by(() => (exam.settings?.timeLimitMinutes ?? 10) * 60);
+	let timeLeft = $state((exam.settings?.timeLimitMinutes ?? 10) * 60);
 	let timerActive = $state(true);
-	let answers = $state.by<{ questionId: string; selected: number; correct: boolean }[]>(() => [...initialAnswers]);
+	let answers = $state<{ questionId: string; selected: number; correct: boolean }[]>([...initialAnswers]);
 	let newMistakes = $state<{ question: Question }[]>([]);
 	let powerUpsUsed = $state<string[]>([]);
 	let revealedOptions = $state<Set<number>>(new Set());

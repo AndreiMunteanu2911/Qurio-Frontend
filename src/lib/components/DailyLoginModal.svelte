@@ -14,24 +14,28 @@
 		onClaim: () => void;
 		onClose: () => void;
 	}>();
+
+	let overlay: HTMLDivElement;
+
+	function handleOverlayClick(event: MouseEvent) {
+		if (event.target === overlay) onClose();
+	}
 </script>
 
 <div
+	bind:this={overlay}
 	class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
 	role="dialog"
 	aria-modal="true"
 	aria-label="Daily login bonus"
 	tabindex="-1"
-	onclick={onClose}
+	onclick={handleOverlayClick}
 	onkeydown={(e) => e.key === 'Escape' && onClose()}
 >
-	<div
+	<section
 		in:fly={{ y: 20, duration: 200 }}
 		class="card text-center"
 		style="max-width: 22rem; width: 100%;"
-		role="document"
-		onclick={(e) => e.stopPropagation()}
-		onkeydown={(e) => e.stopPropagation()}
 	>
 		<div class="flex justify-center">
 			<div class="flex h-14 w-14 items-center justify-center rounded-full" style="background: rgb(255 200 0 / 0.12);">
@@ -61,5 +65,5 @@
 		<button class="mt-2 w-full text-xs font-bold pressable" style="color: var(--text-muted); padding: 0.5rem;" onclick={onClose}>
 			Skip
 		</button>
-	</div>
+	</section>
 </div>
