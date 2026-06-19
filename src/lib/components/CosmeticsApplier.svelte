@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { getInventory } from '$lib/api';
+	import { authReady, user } from '$lib/auth';
 	import { badgeRefresh } from '$lib/refresh';
 
 	let activeCosmetics = $state<Record<string, string>>({});
+	let loadVersion = 0;
 
 	const ACCENT_COLORS: Record<string, { accent: string; accentSoft: string; accentShadow: string }> = {
 		accent_gold: { accent: '#ffd23f', accentSoft: 'rgb(255 210 63 / 0.18)', accentShadow: '#9d7412' },
@@ -42,18 +44,38 @@
 	};
 
 	async function loadInventory() {
+		const currentUser = $user;
+		if (!$authReady || !currentUser) {
+			resetCosmetics();
+			return;
+		}
+
+		const version = ++loadVersion;
+		const uid = currentUser.uid;
+
 		try {
 			const inv = await getInventory();
+			if (version !== loadVersion || !$user || $user.uid !== uid) return;
 			const next = inv.activeCosmetics ?? {};
 			activeCosmetics = next;
 			applyCosmetics(next);
-		} catch { /* ok */ }
+		} catch {
+			if (version === loadVersion) resetCosmetics();
+		}
+	}
+
+	function resetCosmetics() {
+		loadVersion += 1;
+		activeCosmetics = {};
+		applyCosmetics({});
 	}
 
 	let unsub = () => {};
 	onMount(() => {
-		loadInventory();
-		unsub = badgeRefresh.subscribe(() => loadInventory());
+		unsub = badgeRefresh.subscribe(() => {
+			if ($authReady && $user) loadInventory();
+			else resetCosmetics();
+		});
 	});
 	onDestroy(() => unsub());
 
@@ -96,6 +118,8 @@
 	}
 
 	$effect(() => {
-		if (typeof document !== 'undefined') applyCosmetics();
+		if (typeof document === 'undefined' || !$authReady) return;
+		if ($user) loadInventory();
+		else resetCosmetics();
 	});
 </script>
