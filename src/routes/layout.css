@@ -295,8 +295,14 @@ button, a, input, select, textarea {
 	background: rgb(255 255 255 / 0.09);
 	box-shadow: inset 0 2px 0 rgb(19 10 43 / 0.08);
 }
-.progress-seg .seg.done { background: var(--correct); }
-.progress-seg .seg.active { background: var(--violet); }
+.progress-seg .seg.done {
+	background: linear-gradient(90deg, var(--accent), var(--cyan));
+	box-shadow: 0 0 10px var(--accent-soft);
+}
+.progress-seg .seg.active {
+	background: var(--accent);
+	box-shadow: 0 0 0 2px var(--accent-soft), 0 0 12px var(--accent-soft);
+}
 
 .feedback {
 	border-radius: var(--radius-sm);
@@ -306,11 +312,11 @@ button, a, input, select, textarea {
 }
 .feedback.correct {
 	background: var(--correct-bg);
-	border-color: #9cc7ff;
+	border-color: var(--correct);
 }
 .feedback.incorrect {
 	background: var(--incorrect-bg);
-	border-color: #c6ace6;
+	border-color: var(--incorrect);
 }
 
 .stat-grid {
@@ -505,6 +511,7 @@ button, a, input, select, textarea {
 .card-skin-minimal .xp-bar,
 .card-skin-minimal .field,
 .card-skin-minimal .select-dropdown,
+.card-skin-minimal .progress-seg .seg,
 .card-skin-minimal .option,
 .card-skin-minimal .feedback,
 .card-skin-minimal .app-header-inner,
@@ -525,6 +532,7 @@ button, a, input, select, textarea {
 .card-skin-gradient .xp-bar,
 .card-skin-gradient .field,
 .card-skin-gradient .select-dropdown,
+.card-skin-gradient .progress-seg .seg,
 .card-skin-gradient .option,
 .card-skin-gradient .feedback,
 .card-skin-gradient .app-header-inner,
@@ -545,6 +553,7 @@ button, a, input, select, textarea {
 .card-skin-neon .xp-bar,
 .card-skin-neon .field,
 .card-skin-neon .select-dropdown,
+.card-skin-neon .progress-seg .seg,
 .card-skin-neon .option,
 .card-skin-neon .feedback,
 .card-skin-neon .app-header-inner,
@@ -565,6 +574,7 @@ button, a, input, select, textarea {
 .card-skin-glass .xp-bar,
 .card-skin-glass .field,
 .card-skin-glass .select-dropdown,
+.card-skin-glass .progress-seg .seg,
 .card-skin-glass .option,
 .card-skin-glass .feedback,
 .card-skin-glass .app-header-inner,
@@ -586,6 +596,7 @@ button, a, input, select, textarea {
 .card-skin-classic .xp-bar,
 .card-skin-classic .field,
 .card-skin-classic .select-dropdown,
+.card-skin-classic .progress-seg .seg,
 .card-skin-classic .option,
 .card-skin-classic .feedback,
 .card-skin-classic .app-header-inner,
@@ -606,6 +617,7 @@ button, a, input, select, textarea {
 .card-skin-terminal .xp-bar,
 .card-skin-terminal .field,
 .card-skin-terminal .select-dropdown,
+.card-skin-terminal .progress-seg .seg,
 .card-skin-terminal .option,
 .card-skin-terminal .feedback,
 .card-skin-terminal .app-header-inner,
@@ -626,6 +638,7 @@ button, a, input, select, textarea {
 .card-skin-hologram .xp-bar,
 .card-skin-hologram .field,
 .card-skin-hologram .select-dropdown,
+.card-skin-hologram .progress-seg .seg,
 .card-skin-hologram .option,
 .card-skin-hologram .feedback,
 .card-skin-hologram .app-header-inner,
@@ -646,6 +659,7 @@ button, a, input, select, textarea {
 .card-skin-paper .xp-bar,
 .card-skin-paper .field,
 .card-skin-paper .select-dropdown,
+.card-skin-paper .progress-seg .seg,
 .card-skin-paper .option,
 .card-skin-paper .feedback,
 .card-skin-paper .app-header-inner,
@@ -666,6 +680,7 @@ button, a, input, select, textarea {
 .card-skin-obsidian .xp-bar,
 .card-skin-obsidian .field,
 .card-skin-obsidian .select-dropdown,
+.card-skin-obsidian .progress-seg .seg,
 .card-skin-obsidian .option,
 .card-skin-obsidian .feedback,
 .card-skin-obsidian .app-header-inner,
@@ -673,6 +688,18 @@ button, a, input, select, textarea {
 	background: linear-gradient(145deg, #080506, #160709 55%, #050101);
 	border-color: #ff3045;
 	box-shadow: 0 8px 0 #070216, 0 18px 34px rgb(255 48 69 / 0.18);
+}
+
+.progress-seg .seg.done {
+	background: linear-gradient(90deg, var(--accent), var(--cyan));
+	border-color: var(--accent);
+	box-shadow: 0 0 10px var(--accent-soft);
+}
+
+.progress-seg .seg.active {
+	background: var(--accent);
+	border-color: var(--accent);
+	box-shadow: 0 0 0 2px var(--accent-soft), 0 0 12px var(--accent-soft);
 }
 
 html[data-exam-theme] .exam-screen {
@@ -692,26 +719,24 @@ html[data-exam-theme] .exam-screen .text-white {
 
 html[data-exam-theme] .exam-screen .option,
 html[data-exam-theme] .exam-screen .feedback {
-	--text: #170b38;
-	--text-muted: #695d86;
-	background: #fff;
-	border-color: #d7caff;
-	color: #170b38;
+	background: var(--surface);
+	border-color: var(--border-strong);
+	color: var(--text);
 }
 
 html[data-exam-theme] .exam-screen .option.reveal {
-	background: #f8f5ff;
-	border-color: #d7caff;
+	background: color-mix(in srgb, var(--surface-2) 78%, var(--accent-soft));
+	border-color: var(--border);
 }
 
 html[data-exam-theme] .exam-screen .option.correct {
-	background: #e7f9fb;
-	border-color: #69eff7;
+	background: var(--correct-bg);
+	border-color: var(--correct);
 }
 
 html[data-exam-theme] .exam-screen .option.incorrect {
-	background: #f1eafb;
-	border-color: #a68bc7;
+	background: var(--incorrect-bg);
+	border-color: var(--incorrect);
 }
 
 html[data-exam-theme] .exam-screen .option span:not(.letter),
@@ -720,7 +745,7 @@ html[data-exam-theme] .exam-screen .feedback p {
 }
 
 html[data-exam-theme] .exam-screen .feedback p:not(:first-child) {
-	color: #695d86;
+	color: var(--text-muted);
 }
 
 html[data-exam-theme='theme_midnight'] { --exam-bg: radial-gradient(circle at top, #1d2b7a 0%, #080b2a 55%, #030513 100%); }

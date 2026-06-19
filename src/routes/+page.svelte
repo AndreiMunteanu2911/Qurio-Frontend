@@ -1,19 +1,23 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte';
+	import favicon from '$lib/assets/favicon.png';
 </script>
 
 <svelte:head>
 	<title>Qurio - AI Study Exams</title>
 </svelte:head>
 
-<section class="page-stack">
-	<div class="card-accent cyan text-center">
-		<p class="eyebrow">AI study exams</p>
-		<h1 class="mt-4 text-4xl font-black leading-tight text-white">Qurio</h1>
-		<p class="mx-auto mt-2 max-w-sm text-sm font-bold leading-6" style="color: var(--text-muted);">
-			Turn your notes into bite-sized quiz rounds, earn progress, and keep your practice streak moving.
+<section class="page-stack public-page">
+	<div class="card-accent accent text-center">
+		<div class="mx-auto grid h-20 w-20 place-items-center rounded-[1.4rem] border-2" style="border-color: var(--border-strong); background: var(--surface-2); box-shadow: 0 8px 0 #070216;">
+			<img src={favicon} alt="" class="h-16 w-16 rounded-2xl" />
+		</div>
+		<p class="eyebrow mt-5">AI study exams</p>
+		<h1 class="mt-3 text-5xl font-black leading-none text-white">Qurio</h1>
+		<p class="mx-auto mt-3 max-w-sm text-sm font-bold leading-6" style="color: var(--text-muted);">
+			Turn notes into focused quiz rounds, earn progress, and keep your practice streak moving.
 		</p>
-		<div class="mt-5 grid gap-2">
+		<div class="mt-6 grid gap-2">
 			<Button href="/signup">Start studying</Button>
 			<Button href="/login" variant="secondary">Log in</Button>
 		</div>
@@ -43,7 +47,7 @@
 		</div>
 	</div>
 
-	<div class="card grid gap-3">
+	<div class="card-accent cyan grid gap-3">
 		<div class="flex items-center justify-between">
 			<p class="eyebrow">Quest path</p>
 			<span class="tag tag-violet">Lv. 1</span>
@@ -59,3 +63,9 @@
 		<div class="stat-card"><p class="value" style="color: var(--violet);">3</p><p class="label">Steps</p></div>
 	</div>
 </section>
+
+<style>
+	.public-page {
+		padding-block: 0.35rem 1rem;
+	}
+</style>
