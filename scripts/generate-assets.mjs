@@ -8,7 +8,7 @@ const root = join(__dirname, '..');
 const faviconPath = join(root, 'src', 'lib', 'assets', 'favicon.png');
 const resDir = join(root, 'android', 'app', 'src', 'main', 'res');
 
-const BG = '#3e1751';
+const BG = '#160831';
 
 function parseHex(c) {
   const h = c.replace('#', '');
@@ -38,29 +38,35 @@ async function makeIcon(src, dest, w, h, bg, logoScale = 0.65) {
     .toFile(dest);
 }
 
+async function resizeFullIcon(src, dest, size) {
+  await sharp(src)
+    .resize(size, size, { fit: 'cover' })
+    .png()
+    .toFile(dest);
+}
+
 async function main() {
   const meta = await sharp(faviconPath).metadata();
   console.log(`Favicon: ${meta.width}x${meta.height}`);
 
   // --- Launcher icons (full icon on bg) ---
   const iconSizes = {
-    'mipmap-mdpi': 48,
-    'mipmap-hdpi': 72,
-    'mipmap-xhdpi': 96,
-    'mipmap-xxhdpi': 144,
-    'mipmap-xxxhdpi': 192,
+    'mipmap-mdpi': { launcher: 48, adaptive: 108 },
+    'mipmap-hdpi': { launcher: 72, adaptive: 162 },
+    'mipmap-xhdpi': { launcher: 96, adaptive: 216 },
+    'mipmap-xxhdpi': { launcher: 144, adaptive: 324 },
+    'mipmap-xxxhdpi': { launcher: 192, adaptive: 432 },
   };
 
-  for (const [dir, size] of Object.entries(iconSizes)) {
+  for (const [dir, { launcher, adaptive }] of Object.entries(iconSizes)) {
     const outDir = join(resDir, dir);
     if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
 
-    await makeIcon(faviconPath, join(outDir, 'ic_launcher.png'), size, size, true);
-    await makeIcon(faviconPath, join(outDir, 'ic_launcher_round.png'), size, size, true);
-    // Adaptive foreground: 108x108 canvas, larger logo within safe zone
-    await makeIcon(faviconPath, join(outDir, 'ic_launcher_foreground.png'), 108, 108, false, 0.55);
+    await resizeFullIcon(faviconPath, join(outDir, 'ic_launcher.png'), launcher);
+    await resizeFullIcon(faviconPath, join(outDir, 'ic_launcher_round.png'), launcher);
+    await resizeFullIcon(faviconPath, join(outDir, 'ic_launcher_foreground.png'), adaptive);
 
-    console.log(`  ${dir} (${size}px)`);
+    console.log(`  ${dir} (${launcher}px / adaptive ${adaptive}px)`);
   }
 
   // --- Splash screens ---
