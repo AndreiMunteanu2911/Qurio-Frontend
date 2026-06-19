@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { PUBLIC_API_BASE_URL } from '$env/static/public';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -34,6 +35,7 @@
 	let doubleXpActivated = $state(false);
 
 	const examId = $derived(page.params.examId!);
+	const publicShareOrigin = PUBLIC_API_BASE_URL.replace(/\/$/, '');
 	const title = $derived(exam ? `${exam.title} — Qurio` : 'Exam — Qurio');
 
 	function shuffleArray<T>(arr: T[]): T[] {
@@ -117,7 +119,7 @@
 	function exitExam() { goto('/exams'); }
 
 	async function copyLink() {
-		try { await navigator.clipboard.writeText(`${window.location.origin}/shared/${exam?.id}`); pushToast('Share link copied!', 'success'); }
+		try { await navigator.clipboard.writeText(`${publicShareOrigin}/shared/${exam?.id}`); pushToast('Share link copied!', 'success'); }
 		catch { pushToast('Failed to copy link.', 'error'); }
 	}
 
