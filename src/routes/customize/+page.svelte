@@ -37,35 +37,51 @@
 	const equippedInSlot = $derived((slot: string) => activeCosmetics[slot] ?? null);
 
 	const ACCENT_COLORS: Record<string, { color: string; bg: string }> = {
-		accent_gold: { color: '#ffc800', bg: 'rgb(255 200 0 / 0.1)' },
-		accent_rose: { color: '#ff6b9d', bg: 'rgb(255 107 157 / 0.1)' },
-		accent_emerald: { color: '#34d399', bg: 'rgb(52 211 153 / 0.1)' },
-		accent_sapphire: { color: '#60a5fa', bg: 'rgb(96 165 250 / 0.1)' },
-		accent_amber: { color: '#fbbf24', bg: 'rgb(251 191 36 / 0.1)' },
+		accent_gold: { color: '#ffd23f', bg: 'rgb(255 210 63 / 0.18)' },
+		accent_rose: { color: '#ff3f8e', bg: 'rgb(255 63 142 / 0.18)' },
+		accent_emerald: { color: '#12e08a', bg: 'rgb(18 224 138 / 0.18)' },
+		accent_sapphire: { color: '#2f80ff', bg: 'rgb(47 128 255 / 0.18)' },
+		accent_amber: { color: '#ff8a00', bg: 'rgb(255 138 0 / 0.18)' },
+		accent_crimson: { color: '#ff3045', bg: 'rgb(255 48 69 / 0.2)' },
+		accent_lime: { color: '#b6ff2e', bg: 'rgb(182 255 46 / 0.18)' },
+		accent_orchid: { color: '#d946ef', bg: 'rgb(217 70 239 / 0.2)' },
+		accent_ice: { color: '#7dd3fc', bg: 'rgb(125 211 252 / 0.2)' },
 	};
 
 	const THEME_BGS: Record<string, string> = {
-		theme_midnight: '#0c1445',
-		theme_sunset: '#2d1b2e',
-		theme_forest: '#0a1f14',
-		theme_ocean: '#0a1f2e',
-		theme_galaxy: '#0e0820',
+		theme_midnight: 'radial-gradient(circle at top, #1d2b7a 0%, #080b2a 55%, #030513 100%)',
+		theme_sunset: 'linear-gradient(145deg, #4b102b 0%, #9a3412 52%, #321018 100%)',
+		theme_forest: 'linear-gradient(145deg, #062b18 0%, #064e3b 48%, #02130b 100%)',
+		theme_ocean: 'linear-gradient(145deg, #06283d 0%, #075985 48%, #03111c 100%)',
+		theme_galaxy: 'radial-gradient(circle at 20% 10%, #7c3aed 0%, #1d0b42 42%, #05020f 100%)',
+		theme_inferno: 'radial-gradient(circle at top right, #ff3b1f 0%, #4a0909 46%, #050101 100%)',
+		theme_arctic: 'linear-gradient(145deg, #dff7ff 0%, #2f80ff 42%, #07192f 100%)',
+		theme_aurora: 'linear-gradient(135deg, #042f2e 0%, #22c55e 35%, #7c3aed 72%, #0b061b 100%)',
+		theme_royal: 'linear-gradient(145deg, #2e1065 0%, #6d28d9 45%, #f59e0b 120%)',
 	};
 
 	const BORDER_PREVIEW: Record<string, string> = {
 		border_thin_gold: '2px solid #ffc800',
-		border_glow_violet: '0 0 12px rgb(104 73 255 / 0.6)',
-		border_double_ring: '0 0 0 2px #090318, 0 0 0 4px #6849ff',
+		border_glow_violet: '0 0 0 3px #6849ff, 0 0 22px rgb(104 73 255 / 0.75)',
+		border_double_ring: '0 0 0 2px #090318, 0 0 0 5px #6849ff, 0 0 0 8px #69eff7',
 		border_dashed_cyan: '2px dashed #69eff7',
-		border_starburst: '0 0 0 2px #090318, 0 0 0 4px #69eff7, 0 0 16px rgb(105 239 247 / 0.4)',
+		border_starburst: '0 0 0 2px #090318, 0 0 0 5px #69eff7, 0 0 28px rgb(105 239 247 / 0.65)',
+		border_lime_pulse: '0 0 0 4px #b6ff2e, 0 0 24px rgb(182 255 46 / 0.65)',
+		border_inferno: '0 0 0 4px #ff3045, 0 0 26px rgb(255 138 0 / 0.7)',
+		border_prism: '0 0 0 3px #ff3f8e, 0 0 0 6px #7dd3fc, 0 0 0 9px #b6ff2e',
+		border_ice_shard: '0 0 0 3px #dff7ff, 0 0 0 6px #2f80ff, 0 0 24px rgb(125 211 252 / 0.72)',
 	};
 
 	const SKIN_PREVIEW: Record<string, Record<string, string>> = {
-		skin_minimal: { border: '1px solid rgb(255 255 255 / 0.04)', background: 'transparent' },
-		skin_gradient: { border: '1px solid transparent', background: 'linear-gradient(135deg, #6849ff, #69eff7) padding-box, linear-gradient(135deg, #6849ff, #69eff7) border-box' },
-		skin_neon: { boxShadow: '0 0 12px rgb(104 73 255 / 0.2), 0 0 4px rgb(105 239 247 / 0.1)', background: '#130a2b' },
-		skin_glass: { background: 'rgb(19 10 43 / 0.6)', backdropFilter: 'blur(12px)', border: '1px solid rgb(255 255 255 / 0.06)' },
+		skin_minimal: { border: '1px solid rgb(255 255 255 / 0.18)', background: 'rgb(255 255 255 / 0.025)' },
+		skin_gradient: { border: '1px solid rgb(255 255 255 / 0.12)', background: 'linear-gradient(135deg, rgb(104 73 255 / 0.32), rgb(105 239 247 / 0.14)), #130a2b', boxShadow: '0 10px 26px rgb(104 73 255 / 0.22)' },
+		skin_neon: { border: '1px solid rgb(105 239 247 / 0.28)', boxShadow: '0 0 22px rgb(104 73 255 / 0.36), 0 0 10px rgb(105 239 247 / 0.2)', background: '#100624' },
+		skin_glass: { background: 'linear-gradient(145deg, rgb(255 255 255 / 0.13), rgb(255 255 255 / 0.035))', backdropFilter: 'blur(18px)', border: '1px solid rgb(255 255 255 / 0.22)' },
 		skin_classic: { background: '#130a2b' },
+		skin_terminal: { background: '#030b08', border: '1px solid rgb(86 255 146 / 0.28)', boxShadow: 'inset 4px 0 0 #56ff92, 0 0 18px rgb(86 255 146 / 0.12)' },
+		skin_hologram: { background: 'linear-gradient(120deg, rgb(125 211 252 / 0.2), rgb(217 70 239 / 0.18), rgb(182 255 46 / 0.1)), #100624', border: '1px solid rgb(255 255 255 / 0.24)', boxShadow: '0 0 24px rgb(125 211 252 / 0.16)' },
+		skin_paper: { background: 'linear-gradient(145deg, #3a2818, #20130c)', border: '1px solid #c8ad7f', boxShadow: '0 8px 18px rgb(0 0 0 / 0.22)' },
+		skin_obsidian: { background: 'linear-gradient(145deg, #080506, #160709 55%, #050101)', border: '1px solid rgb(255 48 69 / 0.35)', boxShadow: '0 0 26px rgb(255 48 69 / 0.16)' },
 	};
 
 	onMount(async () => {
